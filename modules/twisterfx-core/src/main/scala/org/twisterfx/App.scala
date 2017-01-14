@@ -13,17 +13,12 @@ abstract class App( view: => View = App.defaultView ) extends scala.App {
     Application.launch(classOf[AppHelper], args: _*)
 
     lazy val primaryView: View = view
-    lazy val primaryScene = new Scene( Option(primaryView).map(_.root).orNull)
 
     def start(primaryStage: Stage): Unit = {
 
         //TODO apply stylesheets
-        Option(primaryView).foreach( v => primaryStage.titleProperty.bind(v.title) )
-        primaryStage.setScene(primaryScene)
-
+        Option(primaryView).foreach( v => v.prepareForStage(primaryStage))
         //TODO configure stage
-        primaryStage.sizeToScene()
-        primaryStage.centerOnScreen()
 
     }
 
