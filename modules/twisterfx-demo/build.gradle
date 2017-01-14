@@ -1,0 +1,7 @@
+apply plugin: 'application'
+
+mainClassName = 'org.twisterfx.demo.TwisterDemo'
+
+dependencies {
+    compile project(':twisterfx-core')
+}
