@@ -6,18 +6,18 @@ import javafx.scene.control.Label
 import javafx.scene.{Parent, Scene}
 import javafx.stage.Stage
 
-abstract class App( view: => View = App.defaultView ) extends scala.App {
+abstract class App( view: => View[Parent] = App.defaultView ) extends scala.App {
 
     // main method initialization
-    App.activeApp = Some(this)
-    Application.launch(classOf[AppHelper], args: _*)
+    App.activeApp = this
+    Application.launch(classOf[JavaFXAppAdapter], args: _*)
 
-    lazy val primaryView: View = view
+    lazy val primaryView: View[Parent] = view
 
     def start(primaryStage: Stage): Unit = {
 
         //TODO apply stylesheets
-        Option(primaryView).foreach( v => v.prepareForStage(primaryStage))
+        Option(primaryView).foreach( _.prepareForStage(primaryStage))
         //TODO configure stage
 
     }
@@ -27,18 +27,18 @@ abstract class App( view: => View = App.defaultView ) extends scala.App {
 }
 
 private object App {
-    var activeApp: Option[App] = None
-    def defaultView = View( new Label("Application"), "Application Title")
+    var activeApp: App = _
+    def defaultView = new View("Application Title", new Label("Application"))
 }
 
-private class AppHelper extends Application {
+private class JavaFXAppAdapter extends Application {
 
     override def start(primaryStage: Stage): Unit = {
-        App.activeApp.foreach(_.start(primaryStage))
+        App.activeApp.start(primaryStage)
         primaryStage.show()
     }
 
     override def stop(): Unit = {
-        App.activeApp.foreach(_.stop())
+        App.activeApp.stop()
     }
 }

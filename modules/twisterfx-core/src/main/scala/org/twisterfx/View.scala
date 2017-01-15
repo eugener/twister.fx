@@ -8,12 +8,14 @@ import FXImplicits._
 
 //TODO View loaded from FXML
 
-case class View( root: Parent, titleText: String = null ) {
+class View[+T <: Parent](titleText: String = null, val root: T) {
 
+    // title property
     lazy val title: StringProperty = new SimpleStringProperty(this, "title", titleText)
     def title_=( value: String ): Unit = title.value = value
 
-    def prepareForStage( stage: Stage ): Stage = {
+
+    final def prepareForStage( stage: Stage = new Stage() ): Stage = {
         stage.setScene(new Scene(root))
         stage.titleProperty.bind(title)
         stage.sizeToScene()
@@ -21,7 +23,7 @@ case class View( root: Parent, titleText: String = null ) {
         stage
     }
 
-    def show(): Unit = prepareForStage(new Stage()).show()
+    def show(): Unit = prepareForStage().show()
 
     //TODO Show as dialog?
 
