@@ -28,7 +28,11 @@ abstract class App( view: => View[Parent] = App.defaultView ) extends scala.App 
 
 private object App {
     var activeApp: App = _
-    def defaultView = new View("Application Title", new Label("Application"))
+    def defaultView: View[Label] = {
+        val label = new Label("Application")
+        label.setStyle("-fx-padding: 25;")
+        new View("Application Title", label)
+    }
 }
 
 private class JavaFXAppAdapter extends Application {
