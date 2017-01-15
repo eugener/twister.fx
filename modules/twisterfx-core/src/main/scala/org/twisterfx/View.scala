@@ -1,6 +1,6 @@
 package org.twisterfx
 
-import javafx.beans.property.{SimpleStringProperty, StringProperty}
+import javafx.beans.property._
 import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.Stage
@@ -23,8 +23,13 @@ class View[+T <: Parent](titleText: String, val root: T) {
     lazy val title: StringProperty = new SimpleStringProperty(this, "title", titleText)
     def title_=( value: String ): Unit = title.value = value
 
+    // scene property
+    private lazy val sceneProp = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
+    lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProp.getReadOnlyProperty
+
     final def prepareForStage( stage: Stage = new Stage() ): Stage = {
-        stage.setScene(new Scene(root))
+        sceneProp.value = new Scene(root)
+        stage.setScene(scene.get())
         stage.titleProperty.bind(title)
         stage.sizeToScene()
         stage.centerOnScreen()

@@ -12,7 +12,9 @@ abstract class App( view: => View[Parent] = App.defaultView ) extends scala.App 
     App.activeApp = this
     Application.launch(classOf[JavaFXAppAdapter], args: _*)
 
+
     lazy val primaryView: View[Parent] = view
+
 
     def start(primaryStage: Stage): Unit = {
 
@@ -42,7 +44,6 @@ private class JavaFXAppAdapter extends Application {
         primaryStage.show()
     }
 
-    override def stop(): Unit = {
-        App.activeApp.stop()
-    }
+    override def stop(): Unit = App.activeApp.stop()
+
 }
