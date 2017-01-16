@@ -1,7 +1,14 @@
 package org
 
-import javafx.beans.value.WritableObjectValue
-import javafx.scene.Parent
+import javafx.application.Platform
+import javafx.beans.{InvalidationListener, Observable}
+import javafx.beans.value.{ChangeListener, ObservableValue, WritableObjectValue}
+import javafx.collections.ListChangeListener
+import javafx.collections.ListChangeListener.Change
+
+import scala.concurrent.Future
+import scala.language.implicitConversions
+
 
 package object twisterfx {
 
@@ -13,5 +20,49 @@ package object twisterfx {
 
         def apply(): T = value
     }
+
+    /**
+      * Ensure execution of action on FX thread
+      * @param action to execute
+      */
+    def onFX( action: => Unit ): Unit = {
+        if ( Platform.isFxApplicationThread ) action else Platform.runLater( () => action)
+    }
+
+    //TODO is better API possible?
+    def runAsync[T]( asyncAction: => T )( fxAction: T => Unit = {_ =>} ): Unit = {
+        import scala.concurrent.ExecutionContext.Implicits.global
+        Future(asyncAction).map(fxAction)
+    }
+
+    // --- JavaFX implicit conversions for listeners
+
+    // ChangeListener
+    implicit def func2ChangeListener3[T, R](func: (ObservableValue[_ <: T], T, T) => R): ChangeListener[T] =
+        (o: ObservableValue[_ <: T], oldValue: T, newValue: T) => func(o, oldValue, newValue)
+
+    implicit def func2ChangeListener2[T, R](func: (T, T) => R): ChangeListener[T] =
+        (_: ObservableValue[_ <: T], oldValue: T, newValue: T) => func(oldValue, newValue)
+
+    implicit def func2ChangeListener1[T, R](func: T => R): ChangeListener[T] =
+        (_: ObservableValue[_ <: T], _: T, newValue: T) => func(newValue)
+
+
+    // InvalidationListener
+    implicit def func2InvalidationListener[T, R](func: Observable => Unit): InvalidationListener =
+        (o: Observable) => func(o)
+
+    implicit def func2InvalidationListener[T, R](func: => Unit): InvalidationListener =
+        (_: Observable) => func
+
+    // ListChangeListener
+    implicit def func2ListChangeListener[T]( func: Change[_ <: T] => Unit ): ListChangeListener[T] =
+        (c: Change[_ <: T]) => func(c)
+
+    implicit def func2ListChangeListener[T]( func: => Unit ): ListChangeListener[T] =
+        (_: Change[_ <: T]) => func
+
+
+
 
 }

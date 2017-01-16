@@ -1,15 +1,13 @@
 package org.twisterfx
 
+import java.util.ResourceBundle
 import javafx.beans.property._
 import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.Stage
 
-import org.twisterfx._
-
 object View {
 
-    //TODO add constructor with resource bundle
     //TODO allow injection in the controller
 
     def apply[T <: Parent]( viewTitle: String, rootNode: T ): View[T] = new View[T] {
@@ -18,10 +16,9 @@ object View {
         title = viewTitle
     }
 
-    def apply[T <: Parent]( viewTitle: String, fxmlResource: String ): View[T] = new View[T] {
+    def apply[T <: Parent]( viewTitle: String, fxmlResource: String, resources: ResourceBundle = null ): View[T] = {
         require(fxmlResource != null, "fxml resource cannot be null")
-        override val root: T = FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL )
-        title = viewTitle
+        apply[T]( viewTitle, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resources ))
     }
 
 }
