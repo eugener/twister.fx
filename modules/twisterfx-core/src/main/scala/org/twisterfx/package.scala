@@ -1,8 +1,9 @@
-package org.twisterfx
+package org
 
 import javafx.beans.value.WritableObjectValue
+import javafx.scene.Parent
 
-object FXImplicits {
+package object twisterfx {
 
     // Simpler API for properties
     implicit class PropertyImplicits[T]( objectValue: WritableObjectValue[T]  ) {

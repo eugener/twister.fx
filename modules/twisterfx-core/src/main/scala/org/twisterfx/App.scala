@@ -6,14 +6,14 @@ import javafx.scene.control.Label
 import javafx.scene.{Parent, Scene}
 import javafx.stage.Stage
 
-abstract class App( view: => View[Parent] = App.defaultView ) extends scala.App {
+abstract class App( view: => View[_<:Parent] = App.defaultView ) extends scala.App {
 
     // main method initialization
     App.activeApp = this
     Application.launch(classOf[JavaFXAppAdapter], args: _*)
 
 
-    lazy val primaryView: View[Parent] = view
+    lazy val primaryView: View[_<:Parent] = view
 
 
     def start(primaryStage: Stage): Unit = {
@@ -33,7 +33,7 @@ private object App {
     def defaultView: View[Label] = {
         val label = new Label("Application")
         label.setStyle("-fx-padding: 25;")
-        new View("Application Title", label)
+        View("Application Title", label)
     }
 }
 

@@ -5,32 +5,45 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.Stage
 
-import FXImplicits._
+import org.twisterfx._
 
-//TODO View loaded from FXML
-
-class View[+T <: Parent](titleText: String, val root: T) {
-
-    require( root != null, "Root component of the View cannot be null" )
+object View {
 
     //TODO add constructor with resource bundle
     //TODO allow injection in the controller
-    def this( titleText: String, fxmlResource: String )  {
-        this(titleText, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL ).asInstanceOf[T])
+
+    def apply[T <: Parent]( viewTitle: String, rootNode: T ): View[T] = new View[T] {
+        require(rootNode != null, "Root component of the View cannot be null")
+        override val root: T = rootNode
+        title = viewTitle
     }
 
+    def apply[T <: Parent]( viewTitle: String, fxmlResource: String ): View[T] = new View[T] {
+        require(fxmlResource != null, "fxml resource cannot be null")
+        override val root: T = FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL )
+        title = viewTitle
+    }
+
+}
+
+
+trait View[+T <: Parent] {
+
+    val root: T
+
     // title property
-    lazy val title: StringProperty = new SimpleStringProperty(this, "title", titleText)
-    def title_=( value: String ): Unit = title.value = value
+    lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title")
+    def title: String = titleProperty.value
+    def title_=( value: String ): Unit = titleProperty.value = value
 
     // scene property
-    private lazy val sceneProp = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
-    lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProp.getReadOnlyProperty
+    private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
+    lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProperty.getReadOnlyProperty
 
     final def prepareForStage( stage: Stage = new Stage() ): Stage = {
-        sceneProp.value = new Scene(root)
+        sceneProperty.value = new Scene(root)
         stage.setScene(scene.get())
-        stage.titleProperty.bind(title)
+        stage.titleProperty.bind(titleProperty)
         stage.sizeToScene()
         stage.centerOnScreen()
         stage
