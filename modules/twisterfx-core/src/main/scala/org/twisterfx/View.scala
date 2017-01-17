@@ -12,15 +12,15 @@ object View {
 
     /**
       * Creates a view based on the root node
-      * @param title view title
+      * @param viewTitle view title
       * @param rootNode root node of the view
       * @tparam T root node type
       * @return a view
       */
-    def apply[T <: Parent]( title: String, rootNode: T ): View[T] = new View[T] {
+    def apply[T <: Parent]( viewTitle: String, rootNode: T ): View[T] = new View[T] {
         require(rootNode != null, "Root component of the View cannot be null")
         override val root: T = rootNode
-        this.title = title
+        title = viewTitle
     }
 
     /**
@@ -59,6 +59,7 @@ trait View[+T <: Parent] {
                  style: StageStyle = null ): Stage = {
         sceneProperty.value = new Scene(root)
         stage.setScene(scene.get())
+        println(titleProperty.get)
         stage.titleProperty.bind(titleProperty)
         Option(owner).foreach( stage.initOwner )
         Option(modality).foreach(stage.initModality)
