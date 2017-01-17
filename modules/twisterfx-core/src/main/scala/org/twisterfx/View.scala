@@ -57,17 +57,22 @@ trait View[+T <: Parent] {
                  owner: Window = null,
                  modality: Modality = null,
                  style: StageStyle = null ): Stage = {
+
         sceneProperty.value = new Scene(root)
         stage.setScene(scene.get())
-        println(titleProperty.get)
         stage.titleProperty.bind(titleProperty)
         Option(owner).foreach( stage.initOwner )
         Option(modality).foreach(stage.initModality)
         Option(style).foreach(stage.initStyle)
         stage.sizeToScene()
         stage.centerOnScreen()
+
+        scene.addListener{ scene: Scene => Option(scene).foreach(_ => beforeShow())}
+
         stage
     }
+
+    def beforeShow(): Unit = {}
 
     def showWindow(owner: Window = null, style: StageStyle = StageStyle.DECORATED): Unit = {
         prepareForStage(owner = owner, style = style).show()
