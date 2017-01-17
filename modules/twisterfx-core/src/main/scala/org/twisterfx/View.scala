@@ -4,21 +4,36 @@ import java.util.ResourceBundle
 import javafx.beans.property._
 import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
-import javafx.stage.Stage
+import javafx.stage.{Modality, Stage, StageStyle, Window}
 
 object View {
 
     //TODO allow injection in the controller
 
-    def apply[T <: Parent]( viewTitle: String, rootNode: T ): View[T] = new View[T] {
+    /**
+      * Creates a view based on the root node
+      * @param title view title
+      * @param rootNode root node of the view
+      * @tparam T root node type
+      * @return a view
+      */
+    def apply[T <: Parent]( title: String, rootNode: T ): View[T] = new View[T] {
         require(rootNode != null, "Root component of the View cannot be null")
         override val root: T = rootNode
-        title = viewTitle
+        this.title = title
     }
 
-    def apply[T <: Parent]( viewTitle: String, fxmlResource: String, resources: ResourceBundle = null ): View[T] = {
+    /**
+      * Creates a view by creating root node from fxml resource
+      * @param title view title
+      * @param fxmlResource fxml resource
+      * @param resources resource bundle for i18n
+      * @tparam T root node type
+      * @return a view
+      */
+    def apply[T <: Parent]( title: String, fxmlResource: String, resources: ResourceBundle = null ): View[T] = {
         require(fxmlResource != null, "fxml resource cannot be null")
-        apply[T]( viewTitle, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resources ))
+        apply[T]( title, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resources ))
     }
 
 }
@@ -37,16 +52,29 @@ trait View[+T <: Parent] {
     private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
     lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProperty.getReadOnlyProperty
 
-    final def prepareForStage( stage: Stage = new Stage() ): Stage = {
+    final def prepareForStage(
+                 stage: Stage = new Stage(),
+                 owner: Window = null,
+                 modality: Modality = null,
+                 style: StageStyle = null ): Stage = {
         sceneProperty.value = new Scene(root)
         stage.setScene(scene.get())
         stage.titleProperty.bind(titleProperty)
+        Option(owner).foreach( stage.initOwner )
+        Option(modality).foreach(stage.initModality)
+        Option(style).foreach(stage.initStyle)
         stage.sizeToScene()
         stage.centerOnScreen()
         stage
     }
 
-    def show(): Unit = prepareForStage().show()
+    def showWindow(owner: Window = null, style: StageStyle = StageStyle.DECORATED): Unit = {
+        prepareForStage(owner = owner, style = style).show()
+    }
+
+    def showModal(owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED): Unit = {
+        prepareForStage( owner = owner , modality = modality, style = style).show()
+    }
 
     //TODO Show as dialog?
 
