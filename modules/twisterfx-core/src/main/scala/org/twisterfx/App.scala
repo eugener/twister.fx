@@ -5,8 +5,15 @@ import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.stage.Stage
 
-//TODO inject view
+
+/**
+  * A base from which application object is created. Since it implements [[scala.App]],
+  * it automatically becomes and executable object
+  * @param view function to produce a main view
+  */
 abstract class App( view: => View[_<:Parent] = App.defaultView ) extends scala.App {
+
+    //TODO inject view
 
     // main method initialization
     App.activeApp = this
@@ -19,7 +26,7 @@ abstract class App( view: => View[_<:Parent] = App.defaultView ) extends scala.A
         //TODO apply stylesheets
         Option(primaryView).foreach{
             //TODO configure stage
-            _.prepareForStage(primaryStage).show()
+            _.withStage(primaryStage).show()
         }
 
     }

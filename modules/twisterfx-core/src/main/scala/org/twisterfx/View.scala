@@ -52,7 +52,7 @@ trait View[+T <: Parent] {
     private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
     lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProperty.getReadOnlyProperty
 
-    final def prepareForStage(
+    final def withStage(
                  stage: Stage = new Stage(),
                  owner: Window = null,
                  modality: Modality = null,
@@ -75,11 +75,11 @@ trait View[+T <: Parent] {
     def beforeShow(): Unit = {}
 
     def showWindow(owner: Window = null, style: StageStyle = StageStyle.DECORATED): Unit = {
-        prepareForStage(owner = owner, style = style).show()
+        withStage(owner = owner, style = style).show()
     }
 
     def showModal(owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED): Unit = {
-        prepareForStage( owner = owner , modality = modality, style = style).show()
+        withStage( owner = owner , modality = modality, style = style).show()
     }
 
     //TODO Show as dialog?
