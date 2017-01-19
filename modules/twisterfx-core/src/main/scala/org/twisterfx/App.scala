@@ -1,9 +1,10 @@
 package org.twisterfx
 
 import javafx.application.Application
-import javafx.scene.Parent
-import javafx.scene.control.Label
 import javafx.stage.Stage
+
+import com.gluonhq.ignite.DIContext
+import javax.inject.{Inject, Named}
 
 
 /**
@@ -11,37 +12,38 @@ import javafx.stage.Stage
   * it automatically becomes and executable object
   * @param view function to produce a main view
   */
-abstract class App( view: => View[_<:Parent] = App.defaultView ) extends scala.App {
-
-    //TODO inject view
+abstract class App() extends scala.App {
 
     // main method initialization
     App.activeApp = this
     Application.launch(classOf[JavaFXAppAdapter], args: _*)
 
-    private lazy val primaryView: View[_<:Parent] = view
+    protected def diContext: DIContext
 
-    def start(primaryStage: Stage): Unit = {
+    @Inject @Named("MainView")
+    protected var view: View = _
+
+    protected[twisterfx] final def start(primaryStage: Stage): Unit = {
+
+        diContext.init()
 
         //TODO apply stylesheets
-        Option(primaryView).foreach{
+        Option(view).foreach{ v =>
             //TODO configure stage
-            _.withStage(primaryStage).show()
+            v.withStage(primaryStage)
+            beforeShow()
+            primaryStage.show()
         }
 
     }
 
+    def beforeShow() {}
     def stop() {}
 
 }
 
 private object App {
     var activeApp: App = _
-    def defaultView: View[Label] = {
-        val label = new Label("Application")
-        label.setStyle("-fx-padding: 25;")
-        View("Application Title", label)
-    }
 }
 
 private class JavaFXAppAdapter extends Application {

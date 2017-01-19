@@ -6,45 +6,16 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
 
-object View {
+abstract class View( viewTitle: String, rootNode: Parent ) {
 
-    //TODO allow injection in the controller
+    val root: Parent = rootNode
 
-    /**
-      * Creates a view based on the root node
-      * @param viewTitle view title
-      * @param rootNode root node of the view
-      * @tparam T root node type
-      * @return a view
-      */
-    def apply[T <: Parent]( viewTitle: String, rootNode: T ): View[T] = new View[T] {
-        require(rootNode != null, "Root component of the View cannot be null")
-        override val root: T = rootNode
-        title = viewTitle
+    def this(viewTitle: String, fxmlResource: String, resources: ResourceBundle = null ) = {
+        this( viewTitle, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resources ) )
     }
-
-    /**
-      * Creates a view by creating root node from fxml resource
-      * @param title view title
-      * @param fxmlResource fxml resource
-      * @param resources resource bundle for i18n
-      * @tparam T root node type
-      * @return a view
-      */
-    def apply[T <: Parent]( title: String, fxmlResource: String, resources: ResourceBundle = null ): View[T] = {
-        require(fxmlResource != null, "fxml resource cannot be null")
-        apply[T]( title, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resources ))
-    }
-
-}
-
-
-trait View[+T <: Parent] {
-
-    val root: T
 
     // title property
-    lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title")
+    lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title", viewTitle)
     def title: String = titleProperty.value
     def title_=( value: String ): Unit = titleProperty.value = value
 

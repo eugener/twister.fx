@@ -4,4 +4,6 @@ mainClassName = 'org.twisterfx.demo.TwisterDemo'
 
 dependencies {
     compile project(':twisterfx-core')
+    compile 'com.gluonhq:ignite-spring:1.0.1'
+
 }
