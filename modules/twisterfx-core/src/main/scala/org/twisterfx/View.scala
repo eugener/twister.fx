@@ -69,12 +69,15 @@ trait View {
 
 /**
   * View backed by fxml resource. Root node is created automatically by loading fxml
-  * @param fxmlResource fxml resource
+  * @param fxmlResource fxml resource. If not specified tries to find a resource with same name as view (lowercase) in the same package
   * @param resourceBundle related resource bundle
   */
-abstract class FXMLView( fxmlResource: String, resourceBundle: ResourceBundle = null) extends View {
+abstract class FXMLView( fxmlResource: String = null, resourceBundle: ResourceBundle = null) extends View {
 
-    protected lazy val loader = new FXMLLoader(getClass.getResource(fxmlResource).toURI.toURL, resourceBundle)
+    protected lazy val loader = {
+        val fxml = Option(fxmlResource).getOrElse( getClass.getSimpleName.toLowerCase + ".fxml" )
+        new FXMLLoader(getClass.getResource(fxml).toURI.toURL, resourceBundle)
+    }
 
     protected lazy val root: Parent = loader.load()
 

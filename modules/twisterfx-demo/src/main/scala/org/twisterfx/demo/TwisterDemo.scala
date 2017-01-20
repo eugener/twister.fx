@@ -15,7 +15,7 @@ object TwisterDemo extends App {
 }
 
 @Component("RootView")
-class DemoView extends FXMLView("/demo.fxml") {
+class DemoView extends FXMLView/*("demoview.fxml")*/ {
 
     title = "TwisterFX Demo Application"
 
