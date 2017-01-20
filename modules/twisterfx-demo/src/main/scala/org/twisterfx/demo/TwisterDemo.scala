@@ -5,7 +5,7 @@ import java.util
 import com.gluonhq.ignite.DIContext
 import com.gluonhq.ignite.spring.SpringContext
 import org.springframework.stereotype.Component
-import org.twisterfx.{App, View}
+import org.twisterfx.{App, FXMLView}
 
 object TwisterDemo extends App {
     protected def diContext: DIContext = new SpringContext(this, () => util.Arrays.asList("org.twisterfx"))
@@ -13,4 +13,8 @@ object TwisterDemo extends App {
 }
 
 @Component("RootView")
-class DemoView extends View("TwisterFX Demo Application", "/demo.fxml")
+class DemoView extends FXMLView("/demo.fxml") {
+
+    title = "TwisterFX Demo Application"
+
+}

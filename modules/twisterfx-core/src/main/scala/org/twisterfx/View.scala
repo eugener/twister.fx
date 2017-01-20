@@ -8,25 +8,14 @@ import javafx.stage.{Modality, Stage, StageStyle, Window}
 
 /**
   * Base for all views in the application
-  * @param viewTitle title of the window if the view is shown in it
-  * @param rootNode root node of the view
   */
-abstract class View( viewTitle: String, rootNode: Parent ) {
+trait View {
 
-    val root: Parent = rootNode
-
-    /**
-      * Base for all views in the application
-      * @param viewTitle title of the window if the view is shown in it
-      * @param fxmlResource fxml the root node is loaded from
-      * @param resources optional resource bundle
-      */
-    def this(viewTitle: String, fxmlResource: String, resources: ResourceBundle = null ) = {
-        this( viewTitle, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resources ) )
-    }
+    // root node
+    protected val root: Parent
 
     // title property
-    lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title", viewTitle)
+    lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title", getClass.getSimpleName )
     def title: String = titleProperty.value
     def title_=( value: String ): Unit = titleProperty.value = value
 
@@ -71,5 +60,24 @@ abstract class View( viewTitle: String, rootNode: Parent ) {
 
 
 }
+
+/**
+ * View backed by fxml.
+  * Root node is created automatically by loading fxml
+ */
+
+
+/**
+  * View backed by fxml resource. Root node is created automatically by loading fxml
+  * @param fxmlResource fxml resource
+  * @param resourceBundle related resource bundle
+  */
+abstract class FXMLView( fxmlResource: String, resourceBundle: ResourceBundle = null) extends View {
+
+    protected lazy val root: Parent = FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resourceBundle )
+
+}
+
+
 
 
