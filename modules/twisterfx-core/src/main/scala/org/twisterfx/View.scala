@@ -74,7 +74,11 @@ trait View {
   */
 abstract class FXMLView( fxmlResource: String, resourceBundle: ResourceBundle = null) extends View {
 
-    protected lazy val root: Parent = FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resourceBundle )
+    protected lazy val loader = new FXMLLoader(getClass.getResource(fxmlResource).toURI.toURL, resourceBundle)
+
+    protected lazy val root: Parent = loader.load()
+
+    final def getController[T]: T = loader.getController[T]
 
 }
 
