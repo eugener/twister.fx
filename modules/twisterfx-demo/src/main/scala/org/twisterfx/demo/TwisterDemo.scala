@@ -12,5 +12,5 @@ object TwisterDemo extends App {
     override def stop(): Unit = println("stopping")
 }
 
-@Component("MainView")
+@Component("RootView")
 class DemoView extends View("TwisterFX Demo Application", "/demo.fxml")

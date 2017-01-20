@@ -6,10 +6,21 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
 
+/**
+  * Base for all views in the application
+  * @param viewTitle title of the window if the view is shown in it
+  * @param rootNode root node of the view
+  */
 abstract class View( viewTitle: String, rootNode: Parent ) {
 
     val root: Parent = rootNode
 
+    /**
+      * Base for all views in the application
+      * @param viewTitle title of the window if the view is shown in it
+      * @param fxmlResource fxml the root node is loaded from
+      * @param resources optional resource bundle
+      */
     def this(viewTitle: String, fxmlResource: String, resources: ResourceBundle = null ) = {
         this( viewTitle, FXMLLoader.load( getClass.getResource(fxmlResource).toURI.toURL, resources ) )
     }
@@ -43,6 +54,9 @@ abstract class View( viewTitle: String, rootNode: Parent ) {
         stage
     }
 
+    /**
+      * Invoked just before the view is shown
+      */
     def beforeShow(): Unit = {}
 
     def showWindow(owner: Window = null, style: StageStyle = StageStyle.DECORATED): Unit = {

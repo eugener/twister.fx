@@ -9,8 +9,9 @@ import javax.inject.{Inject, Named}
 
 /**
   * A base from which application object is created. Since it implements [[scala.App]],
-  * it automatically becomes and executable object
-  * @param view function to produce a main view
+  * it automatically becomes and executable object. If the bean of type View with id "RootView"
+  * is available in DI context, it will be injected and used as the root view of the application.
+  *
   */
 abstract class App() extends scala.App {
 
@@ -18,9 +19,14 @@ abstract class App() extends scala.App {
     App.activeApp = this
     Application.launch(classOf[JavaFXAppAdapter], args: _*)
 
+    /**
+     * Application DI context. Has to be implemented in the actual application
+     */
     protected def diContext: DIContext
 
-    @Inject @Named("MainView")
+    // root view. Injected by name
+    @Inject
+    @Named("RootView")
     protected var view: View = _
 
     protected[twisterfx] final def start(primaryStage: Stage): Unit = {
@@ -29,7 +35,7 @@ abstract class App() extends scala.App {
 
         //TODO apply stylesheets
         Option(view).foreach{ v =>
-            //TODO configure stage
+            //TODO better stage configuration is needed
             v.withStage(primaryStage)
             beforeShow()
             primaryStage.show()
@@ -37,7 +43,14 @@ abstract class App() extends scala.App {
 
     }
 
+    /**
+      * Invoked just before showing the primar ystage
+      */
     def beforeShow() {}
+
+    /**
+      * Invoke on application stop
+      */
     def stop() {}
 
 }
