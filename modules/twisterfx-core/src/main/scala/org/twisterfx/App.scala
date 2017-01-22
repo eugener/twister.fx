@@ -1,10 +1,15 @@
 package org.twisterfx
 
+import java.util.Locale
 import javafx.application.Application
+import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.stage.Stage
 
 import com.gluonhq.ignite.DIContext
 import javax.inject.{Inject, Named}
+
+import com.typesafe.scalalogging.{LazyLogging, Logger}
+import org.twisterfx._
 
 
 /**
@@ -13,7 +18,7 @@ import javax.inject.{Inject, Named}
   * is available in DI context, it will be injected and used as the root view of the application.
   *
   */
-abstract class App() extends scala.App {
+abstract class App() extends scala.App with LazyLogging {
 
     // main method initialization
     App.activeApp = this
@@ -34,17 +39,20 @@ abstract class App() extends scala.App {
         diContext.init()
 
         //TODO apply stylesheets
-        Option(view).foreach{ v =>
-            //TODO better stage configuration is needed
-            v.withStage(primaryStage)
-            beforeShow()
-            primaryStage.show()
+        view match {
+            case null => logger.error( "Root view was not found" )
+            case v =>
+                logger.info( "Root view found: " + v.getClass.getName )
+                //TODO better stage configuration is needed
+                v.withStage(primaryStage)
         }
+        beforeShow()
+        primaryStage.show()
 
     }
 
     /**
-      * Invoked just before showing the primar ystage
+      * Invoked just before showing the primary stage show
       */
     def beforeShow() {}
 
@@ -62,4 +70,13 @@ private object App {
 private class JavaFXAppAdapter extends Application {
     override def start(primaryStage: Stage): Unit = App.activeApp.start(primaryStage)
     override def stop(): Unit = App.activeApp.stop()
+}
+
+object AppContext {
+
+    // title property
+    lazy val localeProperty: ObjectProperty[Locale] = new SimpleObjectProperty[Locale]()
+    def locale: Locale = localeProperty.value
+    def locale_=( value: Locale ): Unit = localeProperty.value = value
+
 }

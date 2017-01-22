@@ -6,10 +6,14 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
 
+import com.typesafe.scalalogging.{LazyLogging, Logger}
+
+import scala.util.Try
+
 /**
   * Base for all views in the application
   */
-trait View {
+trait View extends LazyLogging {
 
     // root node
     protected val root: Parent
@@ -58,24 +62,29 @@ trait View {
 
     //TODO Show as dialog?
 
-
 }
 
 /**
- * View backed by fxml.
-  * Root node is created automatically by loading fxml
- */
-
-
-/**
   * View backed by fxml resource. Root node is created automatically by loading fxml
-  * @param fxmlResource fxml resource. If not specified tries to find a resource with same name as view (lowercase) in the same package
-  * @param resourceBundle related resource bundle
+  * Tries to find a resource with same name as view (lowercase) in the same package
+  * Resource bundle with the same name is used if found in the same package.
   */
-abstract class FXMLView( fxmlResource: String = null, resourceBundle: ResourceBundle = null) extends View {
+class FXMLView extends View {
 
-    protected lazy val loader = {
-        val fxml = Option(fxmlResource).getOrElse( getClass.getSimpleName.toLowerCase + ".fxml" )
+    protected lazy val loader: FXMLLoader = {
+
+        // load resource bundle, null if not found
+        val resourceBundle = Try{
+            val bundleName = getClass.getName.toLowerCase
+            ResourceBundle.getBundle(bundleName, AppContext.locale)
+        }.getOrElse{
+            logger.info("Resource bundle is not found - localization is not available.")
+            null
+        }
+
+        val fxml = s"${getClass.getSimpleName.toLowerCase}.fxml"
+        logger.info(s"Assuming fxml location as '$fxml'")
+
         new FXMLLoader(getClass.getResource(fxml).toURI.toURL, resourceBundle)
     }
 

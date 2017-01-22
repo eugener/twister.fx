@@ -26,6 +26,6 @@ class DemoViewController {
     @FXML var tabs: TabPane = _
     @FXML var btAddTab: Button = _
 
-    def addNewTab: Unit = tabs.getTabs.add(new Tab( "Tab " + (tabs.getTabs.size() + 1)))
+    def addNewTab(): Unit = tabs.getTabs.add(new Tab( "Tab " + (tabs.getTabs.size() + 1)))
 
 }
