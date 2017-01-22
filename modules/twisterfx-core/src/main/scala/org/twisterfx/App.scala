@@ -29,7 +29,7 @@ abstract class App() extends scala.App with LazyLogging {
      */
     protected def diContext: DIContext
 
-    // root view. Injected by name
+    // Root view. Injected by name
     @Inject
     @Named("RootView")
     protected var view: View = _
@@ -39,12 +39,12 @@ abstract class App() extends scala.App with LazyLogging {
         diContext.init()
 
         //TODO apply stylesheets
-        view match {
-            case null => logger.error( "Root view was not found" )
-            case v =>
+        Option(view) match {
+            case None    => logger.error( "Root view was not found" )
+            case Some(v) =>
                 logger.info( "Root view found: " + v.getClass.getName )
                 //TODO better stage configuration is needed
-                v.withStage(primaryStage)
+                v.assignTo(primaryStage)
         }
         beforeShow()
         primaryStage.show()
@@ -74,7 +74,8 @@ private class JavaFXAppAdapter extends Application {
 
 object AppContext {
 
-    // title property
+    // global application wide locale
+    // locale property
     lazy val localeProperty: ObjectProperty[Locale] = new SimpleObjectProperty[Locale]()
     def locale: Locale = localeProperty.value
     def locale_=( value: Locale ): Unit = localeProperty.value = value

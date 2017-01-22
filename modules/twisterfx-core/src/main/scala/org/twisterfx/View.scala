@@ -27,7 +27,7 @@ trait View extends LazyLogging {
     private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
     lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProperty.getReadOnlyProperty
 
-    final def withStage(
+    final def assignTo(
                  stage: Stage = new Stage(),
                  owner: Window = null,
                  modality: Modality = null,
@@ -53,11 +53,11 @@ trait View extends LazyLogging {
     def beforeShow(): Unit = {}
 
     def showWindow(owner: Window = null, style: StageStyle = StageStyle.DECORATED): Unit = {
-        withStage(owner = owner, style = style).show()
+        assignTo(owner = owner, style = style).show()
     }
 
     def showModal(owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED): Unit = {
-        withStage( owner = owner , modality = modality, style = style).show()
+        assignTo( owner = owner , modality = modality, style = style).show()
     }
 
     //TODO Show as dialog?
