@@ -6,8 +6,10 @@ import javafx.beans.value.{ChangeListener, ObservableValue, WritableObjectValue}
 import javafx.collections.ListChangeListener
 import javafx.collections.ListChangeListener.Change
 
+import scala.annotation.{StaticAnnotation, compileTimeOnly}
 import scala.concurrent.Future
 import scala.language.implicitConversions
+import scala.reflect.macros.Context
 
 
 package object twisterfx {
@@ -19,6 +21,20 @@ package object twisterfx {
         def value_=( value: T ) : Unit = objectValue.set(value)
 
         def apply(): T = value
+    }
+
+    // Macros based property extensions
+    @compileTimeOnly("Macro paradise plugin has to be enabled")
+    class extendFxProperties extends StaticAnnotation {
+        def macroTransform(annottees: Any*): Any = macro ExtendFXPropertiesMacroImpl.impl
+    }
+
+    class fxProperty(alias: String = null, beanProperty: Boolean = false) extends StaticAnnotation
+
+    object ExtendFXPropertiesMacroImpl {
+        def impl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+            ???
+        }
     }
 
     /**
