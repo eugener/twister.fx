@@ -11,7 +11,7 @@ import javafx.scene.input.KeyCombination
 
 import collection.JavaConverters._
 
-class Command {
+trait Command {
 
     lazy val textProperty: StringProperty = new SimpleStringProperty
     def text: String = textProperty.get
@@ -43,6 +43,22 @@ class Command {
 
     def perform( e: ActionEvent ): Unit = {}
 
+}
+
+object Command {
+
+    def apply( text: String, graphic: Node = null , longText: String = null )( action: ActionEvent => Unit): Command =  {
+        val cmd = new Command {
+            override def perform(e: ActionEvent): Unit = action(e)
+        }
+        cmd.text = text
+        cmd.graphic = graphic
+        cmd
+    }
+
+    def group(text: String)( subcommands: Command* ): Command = {
+        new CommandGroup(text)(subcommands:_*)
+    }
 }
 
 class CommandGroup( groupText: String )( subcommands: Command* ) extends Command {

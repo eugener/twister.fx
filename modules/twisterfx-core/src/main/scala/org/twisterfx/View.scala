@@ -6,7 +6,7 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
 
-import com.typesafe.scalalogging.{LazyLogging, Logger}
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Try
 
