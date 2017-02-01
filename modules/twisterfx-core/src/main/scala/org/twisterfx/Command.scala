@@ -139,34 +139,40 @@ object CommandTools {
 
     }
 
-    def buildToolBar(commands: Iterable[Command], toolbar: => ToolBar = new ToolBar ): ToolBar = {
 
-        commands.foldLeft(toolbar){ (tb,cmd) =>
-            val item = cmd match {
-                case CommandSeparator =>
-                    val separator = new Separator
-                    separator.orientationProperty().bind(
-                        Bindings.when(toolbar.orientationProperty().isEqualTo(Orientation.HORIZONTAL))
+    // implicit methods for command collections
+
+    implicit class CommandsImplicits(commands: Iterable[Command]) {
+
+        def toToolBar( toolbar: => ToolBar = new ToolBar ): ToolBar = {
+
+            commands.foldLeft(toolbar) { (tb, cmd) =>
+                val item = cmd match {
+                    case CommandSeparator =>
+                        val separator = new Separator
+                        separator.orientationProperty().bind(
+                            Bindings.when(toolbar.orientationProperty().isEqualTo(Orientation.HORIZONTAL))
                                 .`then`(Orientation.VERTICAL)
                                 .otherwise(Orientation.HORIZONTAL)
-                    )
-                    separator
-                case _:Command => cmd.toButton(ContentDisplay.GRAPHIC_ONLY)
+                        )
+                        separator
+                    case _: Command => cmd.toButton(ContentDisplay.GRAPHIC_ONLY)
+                }
+
+                tb.getItems.add(item)
+                tb
+
             }
-
-            toolbar.getItems.add(item)
-            toolbar
-
         }
-    }
 
-    def buildMenu(commands: Iterable[Command], menubar: => MenuBar = new MenuBar ): MenuBar = {
-        commands.foldLeft(menubar) { (mb, cmd) =>
-            cmd.toMenuItem match {
-                case m: Menu =>  menubar.getMenus.add(m)
-                case _ =>
+        def toMenu(menubar: => MenuBar = new MenuBar): MenuBar = {
+            commands.foldLeft(menubar) { (mb, cmd) =>
+                cmd.toMenuItem match {
+                    case m: Menu => menubar.getMenus.add(m)
+                    case _ =>
+                }
+                menubar
             }
-            menubar
         }
     }
 

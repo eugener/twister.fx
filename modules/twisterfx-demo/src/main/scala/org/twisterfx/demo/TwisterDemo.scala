@@ -27,11 +27,11 @@ class DemoViewController {
     @FXML var btAddTab: Button = _
 
     @FXML var table: TableView[String] = _
-    @FXML var toolbar: ToolBar = _
+    @FXML implicit var toolbar: ToolBar = _
     @FXML var menuBar: MenuBar = _
 
     lazy val commands = List(
-        Command( "command 1")( e => println("command 1") ),
+        Command( "command 1" )( e => println("command 1") ),
         Command.group("command 2")(
             Command("subcommand 1"){ e => println("subcommand 1") },
             Command("subcommand 2"){ e => println("subcommand 2") },
@@ -40,9 +40,10 @@ class DemoViewController {
         Command("command 3")( e => println("command 3") )
     )
 
-    def initialize: Unit = {
-        CommandTools.buildToolBar(commands, toolbar)
-        CommandTools.buildMenu(commands, menuBar)
+    def initialize(): Unit = {
+        import CommandTools._
+        commands.toToolBar(toolbar)
+        commands.toMenu(menuBar)
     }
 
     def addNewTab(): Unit = tabs.getTabs.add(new Tab( "Tab " + (tabs.getTabs.size() + 1)))
