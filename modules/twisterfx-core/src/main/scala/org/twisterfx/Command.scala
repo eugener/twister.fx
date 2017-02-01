@@ -56,8 +56,8 @@ object Command {
         cmd
     }
 
-    def group(text: String)( subcommands: Command* ): Command = {
-        new CommandGroup(text)(subcommands:_*)
+    def group(text: String)(subCommands: Command* ): Command = {
+        new CommandGroup(text)(subCommands:_*)
     }
 }
 
@@ -65,6 +65,7 @@ class CommandGroup( groupText: String )( subcommands: Command* ) extends Command
     text = groupText
     val commands: ObservableList[Command] = FXCollections.observableArrayList[Command]()
     Option(subcommands).foreach( cmds => commands.addAll(cmds.asJava))
+    final override def perform( e: ActionEvent ): Unit = {} // no-op
 }
 
 object CommandSeparator extends Command
@@ -74,6 +75,12 @@ object CommandTools {
 
     implicit class CommandImplicits( cmd: Command ) {
 
+        /**
+          * Create a button bound the command properties.
+          * MenuButton is created for CommandGroup
+          * @param contentDisplay buttons content display type
+          * @return newly created button
+          */
         def toButton( contentDisplay: ContentDisplay = null ): ButtonBase = {
 
             val button = cmd match {
@@ -108,6 +115,11 @@ object CommandTools {
 
         }
 
+        /**
+          * Creates a menu item bound to the command properties
+          * Menu is created for CommandGroup
+          * @return newly created menu item
+          */
         def toMenuItem: MenuItem = {
 
             val menuItem = cmd match {
@@ -144,6 +156,11 @@ object CommandTools {
 
     implicit class CommandsImplicits(commands: Iterable[Command]) {
 
+        /**
+          * Converts a set of commands to a toolbar
+          * @param toolbar toolbar which has to be used. new one is created by default
+          * @return updated toolbar
+          */
         def toToolBar( toolbar: => ToolBar = new ToolBar ): ToolBar = {
 
             commands.foldLeft(toolbar) { (tb, cmd) =>
@@ -165,13 +182,30 @@ object CommandTools {
             }
         }
 
+        /**
+          * Converts a set of commands to a menubar
+          * @param menubar menubar which has to be used. new one is created by default
+          * @return updated menubar
+          */
         def toMenu(menubar: => MenuBar = new MenuBar): MenuBar = {
             commands.foldLeft(menubar) { (mb, cmd) =>
                 cmd.toMenuItem match {
                     case m: Menu => menubar.getMenus.add(m)
                     case _ =>
                 }
-                menubar
+                mb
+            }
+        }
+
+        /**
+          * Converts a set of commands to a context menu
+          * @param menu context menu which has to be used. new one is created by default
+          * @return updated context menu
+          */
+        def toContextMenu(menu: => ContextMenu = new ContextMenu): ContextMenu = {
+            commands.foldLeft(menu) { (mn, cmd) =>
+                mn.getItems.add(cmd.toMenuItem)
+                mn
             }
         }
     }

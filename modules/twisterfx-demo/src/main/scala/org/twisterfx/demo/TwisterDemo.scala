@@ -44,6 +44,7 @@ class DemoViewController {
         import CommandTools._
         commands.toToolBar(toolbar)
         commands.toMenu(menuBar)
+        table.setContextMenu(commands.toContextMenu())
     }
 
     def addNewTab(): Unit = tabs.getTabs.add(new Tab( "Tab " + (tabs.getTabs.size() + 1)))
