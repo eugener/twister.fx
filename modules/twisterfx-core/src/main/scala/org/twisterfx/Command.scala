@@ -59,19 +59,41 @@ object Command {
     def group(text: String)(subCommands: Command* ): Command = {
         new CommandGroup(text)(subCommands:_*)
     }
+
+    def check(text: String): Command = {
+        val cmd = new CommandCheck
+        cmd.text = text
+        cmd
+    }
+
+    def radio( text: String, groupId: String ) = {
+        val cmd = new CommandRadio(groupId)
+        cmd.text = text
+        cmd
+    }
 }
 
-class CommandGroup( groupText: String )( subcommands: Command* ) extends Command {
-    text = groupText
-    val commands: ObservableList[Command] = FXCollections.observableArrayList[Command]()
-    Option(subcommands).foreach( cmds => commands.addAll(cmds.asJava))
+trait MutedCommand extends Command {
     final override def perform( e: ActionEvent ): Unit = {} // no-op
 }
 
-object CommandSeparator extends Command
+class CommandGroup( groupText: String )( subcommands: Command* ) extends MutedCommand {
+    text = groupText
+    val commands: ObservableList[Command] = FXCollections.observableArrayList[Command]()
+    Option(subcommands).foreach( cmds => commands.addAll(cmds.asJava))
+
+}
+
+class CommandCheck extends MutedCommand
+class CommandRadio( val groupId: String )  extends MutedCommand
+
+object CommandSeparator  extends MutedCommand
+
 
 
 object CommandTools {
+
+    private implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
 
     implicit class CommandImplicits( cmd: Command ) {
 
@@ -85,12 +107,20 @@ object CommandTools {
 
             val button = cmd match {
 
-                //TODO Check and Radio buttons
                 case cg: CommandGroup =>
                     cg.commands.asScala.foldLeft(new MenuButton){ (btn,c) =>
                         btn.getItems.add(c.toMenuItem)
                         btn
                     }
+                case c: CommandCheck =>
+                    val btn = new ToggleButton
+                    btn.selectedProperty().bindBidirectional(c.selectedProperty)
+                    btn
+                case c: CommandRadio =>
+                    val btn = new ToggleButton
+                    btn.setToggleGroup( groupCache.getOrElseUpdate(c.groupId, new ToggleGroup) )
+                    btn.selectedProperty().bindBidirectional(c.selectedProperty)
+                    btn
                 case c: Command =>
                     val btn = new Button
                     btn.setOnAction(c.perform)
@@ -101,7 +131,7 @@ object CommandTools {
 
             button.textProperty.bind(cmd.textProperty)
             button.graphicProperty().bind(cmd.graphicProperty)
-            button.disableProperty.bind(cmd.disabledProperty)
+            button.disableProperty.bindBidirectional(cmd.disabledProperty)
 
             //TODO bind style without losing existing control styles
 //            button.styleProperty().bind(cmd.styleProperty)
@@ -123,13 +153,21 @@ object CommandTools {
         def toMenuItem: MenuItem = {
 
             val menuItem = cmd match {
-                //TODO Check and Radio menu items
                 case cg: CommandGroup =>
                     cg.commands.asScala.foldLeft(new Menu){ (menu,c) =>
                         menu.getItems.add(c.toMenuItem)
                         menu
                     }
                 case CommandSeparator => new SeparatorMenuItem
+                case c: CommandCheck =>
+                    val mi = new CheckMenuItem
+                    mi.selectedProperty().bindBidirectional(c.selectedProperty)
+                    mi
+                case c: CommandRadio =>
+                    val mi = new RadioMenuItem
+                    mi.setToggleGroup( groupCache.getOrElseUpdate(c.groupId, new ToggleGroup) )
+                    mi.selectedProperty().bindBidirectional(c.selectedProperty)
+                    mi
                 case c : Command =>
                     val mi = new MenuItem
                     mi.setOnAction(c.perform)
@@ -138,7 +176,7 @@ object CommandTools {
 
             menuItem.textProperty.bind(cmd.textProperty)
             menuItem.graphicProperty.bind(cmd.graphicProperty)
-            menuItem.disableProperty.bind(cmd.disabledProperty)
+            menuItem.disableProperty.bindBidirectional(cmd.disabledProperty)
             //TODO bind style without losing existing control styles
 //            menuItem.styleProperty.bind(cmd.styleProperty)
             menuItem.acceleratorProperty.bind(cmd.acceleratorProperty)
@@ -161,7 +199,7 @@ object CommandTools {
           * @param toolbar toolbar which has to be used. new one is created by default
           * @return updated toolbar
           */
-        def toToolBar( toolbar: => ToolBar = new ToolBar ): ToolBar = {
+        def toToolBar( toolbar: => ToolBar = new ToolBar ) : ToolBar = {
 
             commands.foldLeft(toolbar) { (tb, cmd) =>
                 val item = cmd match {
