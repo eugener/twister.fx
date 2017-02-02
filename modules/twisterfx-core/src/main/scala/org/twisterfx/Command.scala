@@ -1,7 +1,9 @@
 package org.twisterfx
 
+import java.util
 import javafx.beans.binding.Bindings
 import javafx.beans.property._
+import javafx.collections.ListChangeListener.Change
 import javafx.collections.{FXCollections, ObservableList}
 import javafx.event.ActionEvent
 import javafx.geometry.Orientation
@@ -9,7 +11,7 @@ import javafx.scene.Node
 import javafx.scene.control._
 import javafx.scene.input.KeyCombination
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 
 trait Command {
 
@@ -37,9 +39,7 @@ trait Command {
     def selected: Boolean = selectedProperty.get()
     def selected_=(value: Boolean): Unit = selectedProperty.set(value)
 
-//    lazy val styleProperty: StringProperty = new SimpleStringProperty
-//    def style: String = styleProperty.get
-//    def style_=(value: String): Unit = styleProperty.set(value)
+    lazy val styleClass: ObservableList[String] = FXCollections.observableArrayList[String]
 
     def perform( e: ActionEvent ): Unit = {}
 
@@ -93,7 +93,7 @@ object CommandSeparator  extends MutedCommand
 
 object CommandTools {
 
-    private implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
+    private implicit lazy val groupCache = collection.mutable.Map[String, ToggleGroup]()
 
     implicit class CommandImplicits( cmd: Command ) {
 
@@ -132,10 +132,16 @@ object CommandTools {
             button.textProperty.bind(cmd.textProperty)
             button.graphicProperty().bind(cmd.graphicProperty)
             button.disableProperty.bindBidirectional(cmd.disabledProperty)
+            bindStyleClass(cmd.styleClass,button.getStyleClass)
 
-            //TODO bind style without losing existing control styles
-//            button.styleProperty().bind(cmd.styleProperty)
-            //TODO set accelerator
+            def resetAccelerator() = {
+                Option(button.getScene).foreach {
+                    _.getAccelerators.put(cmd.accelerator, () => button.fire())
+                }
+            }
+            button.sceneProperty().addListener( (_, _, scene) => resetAccelerator())
+            cmd.acceleratorProperty.addListener( (_,_,_) => resetAccelerator())
+            resetAccelerator()
 
             val tooltip = new Tooltip
             tooltip.textProperty().bind(cmd.longTextProperty)
@@ -177,13 +183,26 @@ object CommandTools {
             menuItem.textProperty.bind(cmd.textProperty)
             menuItem.graphicProperty.bind(cmd.graphicProperty)
             menuItem.disableProperty.bindBidirectional(cmd.disabledProperty)
-            //TODO bind style without losing existing control styles
-//            menuItem.styleProperty.bind(cmd.styleProperty)
             menuItem.acceleratorProperty.bind(cmd.acceleratorProperty)
-
-            //TODO tooltip
+            bindStyleClass(cmd.styleClass,menuItem.getStyleClass)
 
             menuItem
+
+        }
+
+        protected def bindStyleClass( source: ObservableList[String], dest: ObservableList[String]): Unit = {
+            source.addListener{ change: Change[ _ <: String] =>
+                val toAdd = new util.ArrayList[String]
+                val toRemove = new util.ArrayList[String]
+                while( change.next ){
+                    if ( change.wasAdded() ) toAdd.addAll(change.getAddedSubList)
+                    if ( change.wasRemoved() ) toRemove.addAll(change.getRemoved)
+                }
+                dest.removeAll(toRemove)
+                dest.addAll(toAdd)
+                ()
+            }
+
 
         }
 
@@ -221,9 +240,9 @@ object CommandTools {
         }
 
         /**
-          * Converts a set of commands to a menubar
-          * @param menubar menubar which has to be used. new one is created by default
-          * @return updated menubar
+          * Converts a set of commands to a menu bar
+          * @param menubar menu bar which has to be used. new one is created by default
+          * @return updated menu bar
           */
         def toMenu(menubar: => MenuBar = new MenuBar): MenuBar = {
             commands.foldLeft(menubar) { (mb, cmd) =>
