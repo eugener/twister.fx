@@ -12,6 +12,7 @@ import javafx.scene.control._
 import javafx.scene.input.KeyCombination
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 trait Command {
 
@@ -66,7 +67,7 @@ object Command {
         cmd
     }
 
-    def radio( text: String, groupId: String ) = {
+    def radio( text: String, groupId: String ): Command = {
         val cmd = new CommandRadio(groupId)
         cmd.text = text
         cmd
@@ -101,7 +102,7 @@ object CommandTools {
           * @param contentDisplay buttons content display type
           * @return newly created button
           */
-        def toButton( contentDisplay: ContentDisplay = null )( implicit groupCache: collection.mutable.Map[String, ToggleGroup] ): ButtonBase = {
+        def toButton( contentDisplay: ContentDisplay = null )( implicit groupCache: mutable.Map[String, ToggleGroup] = mutable.Map() ): ButtonBase = {
 
             val button = cmd match {
 
@@ -154,7 +155,7 @@ object CommandTools {
           * Menu is created for CommandGroup
           * @return newly created menu item
           */
-        def toMenuItem( implicit groupCache: collection.mutable.Map[String, ToggleGroup] ): MenuItem = {
+        def toMenuItem( implicit groupCache: mutable.Map[String, ToggleGroup] = mutable.Map() ): MenuItem = {
 
             val menuItem = cmd match {
                 case cg: CommandGroup =>
@@ -218,7 +219,7 @@ object CommandTools {
           */
         def toToolBar( toolbar: => ToolBar = new ToolBar ) : ToolBar = {
 
-            implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
+            implicit val groupCache = mutable.Map[String, ToggleGroup]()
 
             commands.foldLeft(toolbar) { (tb, cmd) =>
                 val item = cmd match {
@@ -245,7 +246,7 @@ object CommandTools {
           * @return updated menu bar
           */
         def toMenu(menubar: => MenuBar = new MenuBar): MenuBar = {
-            implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
+            implicit val groupCache = mutable.Map[String, ToggleGroup]()
 
             commands.foldLeft(menubar) { (mb, cmd) =>
                 cmd.toMenuItem match {
@@ -262,7 +263,7 @@ object CommandTools {
           * @return updated context menu
           */
         def toContextMenu(menu: => ContextMenu = new ContextMenu): ContextMenu = {
-            implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
+            implicit val groupCache = mutable.Map[String, ToggleGroup]()
 
             commands.foldLeft(menu) { (mn, cmd) =>
                 mn.getItems.add(cmd.toMenuItem)
