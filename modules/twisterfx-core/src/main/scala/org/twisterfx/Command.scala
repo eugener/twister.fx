@@ -93,8 +93,6 @@ object CommandSeparator  extends MutedCommand
 
 object CommandTools {
 
-    private implicit lazy val groupCache = collection.mutable.Map[String, ToggleGroup]()
-
     implicit class CommandImplicits( cmd: Command ) {
 
         /**
@@ -103,7 +101,7 @@ object CommandTools {
           * @param contentDisplay buttons content display type
           * @return newly created button
           */
-        def toButton( contentDisplay: ContentDisplay = null ): ButtonBase = {
+        def toButton( contentDisplay: ContentDisplay = null )( implicit groupCache: collection.mutable.Map[String, ToggleGroup] ): ButtonBase = {
 
             val button = cmd match {
 
@@ -114,12 +112,12 @@ object CommandTools {
                     }
                 case c: CommandCheck =>
                     val btn = new ToggleButton
-                    btn.selectedProperty().bindBidirectional(c.selectedProperty)
+                    c.selectedProperty.bindBidirectional(btn.selectedProperty)
                     btn
                 case c: CommandRadio =>
                     val btn = new ToggleButton
-                    btn.setToggleGroup( groupCache.getOrElseUpdate(c.groupId, new ToggleGroup) )
-                    btn.selectedProperty().bindBidirectional(c.selectedProperty)
+                    btn.setToggleGroup( groupCache.getOrElseUpdate( c.groupId, new ToggleGroup) )
+                    c.selectedProperty.bindBidirectional( btn.selectedProperty)
                     btn
                 case c: Command =>
                     val btn = new Button
@@ -156,7 +154,7 @@ object CommandTools {
           * Menu is created for CommandGroup
           * @return newly created menu item
           */
-        def toMenuItem: MenuItem = {
+        def toMenuItem( implicit groupCache: collection.mutable.Map[String, ToggleGroup] ): MenuItem = {
 
             val menuItem = cmd match {
                 case cg: CommandGroup =>
@@ -190,7 +188,7 @@ object CommandTools {
 
         }
 
-        protected def bindStyleClass( source: ObservableList[String], dest: ObservableList[String]): Unit = {
+        private def bindStyleClass( source: ObservableList[String], dest: ObservableList[String]): Unit = {
             source.addListener{ change: Change[ _ <: String] =>
                 val toAdd = new util.ArrayList[String]
                 val toRemove = new util.ArrayList[String]
@@ -220,6 +218,8 @@ object CommandTools {
           */
         def toToolBar( toolbar: => ToolBar = new ToolBar ) : ToolBar = {
 
+            implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
+
             commands.foldLeft(toolbar) { (tb, cmd) =>
                 val item = cmd match {
                     case CommandSeparator =>
@@ -245,6 +245,8 @@ object CommandTools {
           * @return updated menu bar
           */
         def toMenu(menubar: => MenuBar = new MenuBar): MenuBar = {
+            implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
+
             commands.foldLeft(menubar) { (mb, cmd) =>
                 cmd.toMenuItem match {
                     case m: Menu => menubar.getMenus.add(m)
@@ -260,6 +262,8 @@ object CommandTools {
           * @return updated context menu
           */
         def toContextMenu(menu: => ContextMenu = new ContextMenu): ContextMenu = {
+            implicit val groupCache = collection.mutable.Map[String, ToggleGroup]()
+
             commands.foldLeft(menu) { (mn, cmd) =>
                 mn.getItems.add(cmd.toMenuItem)
                 mn
