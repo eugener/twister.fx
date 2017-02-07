@@ -57,19 +57,21 @@ object Command {
         cmd
     }
 
-    def group(text: String)(subCommands: Command* ): Command = {
+    def group(text: String, graphic: Node = null)(subCommands: Command* ): Command = {
         new CommandGroup(text)(subCommands:_*)
     }
 
-    def check(text: String): Command = {
+    def check(text: String, graphic: Node = null): Command = {
         val cmd = new CommandCheck
         cmd.text = text
+        cmd.graphic = graphic
         cmd
     }
 
-    def radio( text: String, groupId: String ): Command = {
+    def radio( text: String, graphic: Node = null, groupId: String ): Command = {
         val cmd = new CommandRadio(groupId)
         cmd.text = text
+        cmd.graphic = graphic
         cmd
     }
 }
