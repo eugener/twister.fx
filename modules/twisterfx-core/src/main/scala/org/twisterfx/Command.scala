@@ -92,7 +92,7 @@ trait MutedCommand extends Command {
     final override def perform( e: ActionEvent ): Unit = {} // no-op
 }
 
-trait SelectableCommand extends Command {
+trait Selectable  {
 
     // selected used mostly on check and radio buttons and menu items
     lazy val selectedProperty: BooleanProperty = new SimpleBooleanProperty
@@ -117,18 +117,18 @@ class CommandGroup( groupText: String )( subcommands: Command* ) extends MutedCo
 /**
   * Command represented by check menu item or toggle check button
   */
-class CommandCheck extends MutedCommand with SelectableCommand
+class CommandCheck extends MutedCommand with Selectable
 
 /**
   * Command represented by radio menu item or toggle radio button
   * @param groupId allows for grouping of radio items using toggle groups
   */
-class CommandRadio( val groupId: String ) extends MutedCommand with SelectableCommand
+class CommandRadio( val groupId: String ) extends MutedCommand with Selectable
 
 /**
   * Represents separator either for toolbar or menu
   */
-object CommandSeparator  extends MutedCommand
+object CommandSeparator extends MutedCommand
 
 
 
