@@ -14,38 +14,50 @@ import javafx.scene.input.KeyCombination
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
+/**
+  * Basic command trait with all relevant properties
+  */
 trait Command {
 
+    // text which usually shows up on the button ot menu item
     lazy val textProperty: StringProperty = new SimpleStringProperty
     def text: String = textProperty.get
     def text_=(value: String): Unit = textProperty.set(value)
 
+    // long text is used mostly on tooltips
     lazy val longTextProperty: StringProperty = new SimpleStringProperty
     def longText: String = longTextProperty.get
     def longText_=(value: String): Unit = longTextProperty.set(value)
 
+    // graphic shown on the buttons or menu items
     lazy val graphicProperty: ObjectProperty[Node] = new SimpleObjectProperty[Node]
     def graphic: Node = graphicProperty.get
     def graphic_=(value: Node): Unit = graphicProperty.set(value)
 
+    // disabled status propagated to associated controls
     lazy val disabledProperty: BooleanProperty = new SimpleBooleanProperty
     def disabled: Boolean = disabledProperty.get()
     def disabled_=(value: Boolean): Unit = disabledProperty.set(value)
 
+    // accelerator assigned to the action
     lazy val acceleratorProperty: ObjectProperty[KeyCombination] = new SimpleObjectProperty[KeyCombination]
     def accelerator: KeyCombination = acceleratorProperty.get
     def accelerator_=(value: KeyCombination): Unit = acceleratorProperty.set(value)
 
-    lazy val selectedProperty: BooleanProperty = new SimpleBooleanProperty
-    def selected: Boolean = selectedProperty.get()
-    def selected_=(value: Boolean): Unit = selectedProperty.set(value)
-
+    // style classes propagated to related controls
     lazy val styleClass: ObservableList[String] = FXCollections.observableArrayList[String]
 
+    /**
+      * Called on command execution
+      * @param e action event
+      */
     def perform( e: ActionEvent ): Unit = {}
 
 }
 
+/**
+  * Command creation tools
+  */
 object Command {
 
     def apply( text: String, graphic: Node = null , longText: String = null )( action: ActionEvent => Unit): Command =  {
@@ -80,6 +92,21 @@ trait MutedCommand extends Command {
     final override def perform( e: ActionEvent ): Unit = {} // no-op
 }
 
+trait SelectableCommand extends Command {
+
+    // selected used mostly on check and radio buttons and menu items
+    lazy val selectedProperty: BooleanProperty = new SimpleBooleanProperty
+    def selected: Boolean = selectedProperty.get()
+    def selected_=(value: Boolean): Unit = selectedProperty.set(value)
+
+}
+
+/**
+  * Group of commands with common name.
+  * Represented by dropdown button or submenu item
+  * @param groupText group text
+  * @param subcommands commands in the group
+  */
 class CommandGroup( groupText: String )( subcommands: Command* ) extends MutedCommand {
     text = groupText
     val commands: ObservableList[Command] = FXCollections.observableArrayList[Command]()
@@ -87,9 +114,20 @@ class CommandGroup( groupText: String )( subcommands: Command* ) extends MutedCo
 
 }
 
-class CommandCheck extends MutedCommand
-class CommandRadio( val groupId: String )  extends MutedCommand
+/**
+  * Command represented by check menu item or toggle check button
+  */
+class CommandCheck extends MutedCommand with SelectableCommand
 
+/**
+  * Command represented by radio menu item or toggle radio button
+  * @param groupId allows for grouping of radio items using toggle groups
+  */
+class CommandRadio( val groupId: String ) extends MutedCommand with SelectableCommand
+
+/**
+  * Represents separator either for toolbar or menu
+  */
 object CommandSeparator  extends MutedCommand
 
 
@@ -140,7 +178,7 @@ object CommandTools {
                     _.getAccelerators.put(cmd.accelerator, () => button.fire())
                 }
             }
-            button.sceneProperty().addListener( (_, _, scene) => resetAccelerator())
+            button.sceneProperty().addListener( (_,_,_) => resetAccelerator())
             cmd.acceleratorProperty.addListener( (_,_,_) => resetAccelerator())
             resetAccelerator()
 
