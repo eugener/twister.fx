@@ -31,17 +31,17 @@ class DemoViewController {
     @FXML var menuBar: MenuBar = _
 
     lazy val commands = List(
-        Command( "command 1" )( e => println("command 1") ),
+        Command( "command 1" )(_ => println("command 1") ),
         Command.group("command 2")(
-            Command("subcommand 1"){ e => println("subcommand 1") },
-            Command("subcommand 2"){ e => println("subcommand 2") },
-            Command("subcommand 3"){ e => println("subcommand 3") },
+            Command("subcommand 1"){ _ => println("subcommand 1") },
+            Command("subcommand 2"){ _ => println("subcommand 2") },
+            Command("subcommand 3"){ _ => println("subcommand 3") },
             Command.check("check 1"),
             Command.radio("radio 1", "g1"),
             Command.radio("radio 2", "g1"),
             Command.radio("radio 3", "g1")
         ),
-        Command("command 3")( e => println("command 3") ),
+        Command("command 3")(_ => println("command 3") ),
         Command.radio("radio 21", "g2"),
         Command.radio("radio 22", "g2"),
         Command.radio("radio 23", "g2")

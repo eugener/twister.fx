@@ -55,6 +55,9 @@ trait Command {
 
 }
 
+/**
+  * Command creation tools
+  */
 object Command {
 
     def apply( text: String, graphic: Node = null , longText: String = null )( action: ActionEvent => Unit): Command =  {
@@ -96,6 +99,12 @@ trait SelectableCommand extends Command {
 
 }
 
+/**
+  * Group of commands with common name.
+  * Represented by dropdown button or submenu item
+  * @param groupText group text
+  * @param subcommands commands in the group
+  */
 class CommandGroup( groupText: String )( subcommands: Command* ) extends MutedCommand {
     text = groupText
     val commands: ObservableList[Command] = FXCollections.observableArrayList[Command]()
@@ -103,9 +112,20 @@ class CommandGroup( groupText: String )( subcommands: Command* ) extends MutedCo
 
 }
 
+/**
+  * Command represented by check menu item or toggle check button
+  */
 class CommandCheck extends MutedCommand with SelectableCommand
+
+/**
+  * Command represented by radio menu item or toggle radio button
+  * @param groupId allows for grouping of radio items using toggle groups
+  */
 class CommandRadio( val groupId: String ) extends MutedCommand with SelectableCommand
 
+/**
+  * Represents separator either for toolbar or menu
+  */
 object CommandSeparator  extends MutedCommand
 
 
@@ -156,7 +176,7 @@ object CommandTools {
                     _.getAccelerators.put(cmd.accelerator, () => button.fire())
                 }
             }
-            button.sceneProperty().addListener( (_, _, scene) => resetAccelerator())
+            button.sceneProperty().addListener( (_,_,_) => resetAccelerator())
             cmd.acceleratorProperty.addListener( (_,_,_) => resetAccelerator())
             resetAccelerator()
 
