@@ -1,6 +1,6 @@
 dependencies {
 
-    compile 'com.gluonhq:ignite-common:1.0.1'
+    compile 'com.gluonhq:ignite-common:1.0.2'
     compile 'javax.inject:javax.inject:1'
 
     compile "com.typesafe.scala-logging:scala-logging_$scala_base:3.5.0"

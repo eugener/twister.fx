@@ -3,4 +3,6 @@ include 'modules/twisterfx-core'
 findProject(':modules/twisterfx-core')?.name = 'twisterfx-core'
 include 'modules:twisterfx-demo'
 findProject(':modules:twisterfx-demo')?.name = 'twisterfx-demo'
+include 'modules:gitfx'
+findProject(':modules:gifx')?.name = 'gitfx'
 

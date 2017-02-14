@@ -5,6 +5,7 @@ import javafx.beans.property._
 import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
+import javax.inject.{Inject, Named}
 
 import com.typesafe.scalalogging.LazyLogging
 
@@ -13,10 +14,11 @@ import scala.util.Try
 /**
   * Base for all views in the application
   */
+@Named
 trait View extends LazyLogging {
 
     // root node
-    protected val root: Parent
+    val root: Parent
 
     // title property
     lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title", getClass.getSimpleName )
@@ -33,7 +35,7 @@ trait View extends LazyLogging {
                  modality: Modality = null,
                  style: StageStyle = null ): Stage = {
 
-        sceneProperty.value = new Scene(root)
+        sceneProperty.set(new Scene(root))
         stage.setScene(scene.get())
         stage.titleProperty.bind(titleProperty)
         Option(owner).foreach( stage.initOwner )
@@ -69,9 +71,29 @@ trait View extends LazyLogging {
   * Tries to find a resource with same name as view (lowercase) in the same package
   * Resource bundle with the same name is used if found in the same package.
   */
+@Named
 class FXMLView extends View {
 
-    protected lazy val loader: FXMLLoader = {
+//    protected lazy val loader: FXMLLoader = {
+//
+//        // load resource bundle, null if not found
+//        val resourceBundle = Try{
+//            val bundleName = getClass.getName.toLowerCase
+//            ResourceBundle.getBundle(bundleName, AppContext.locale)
+//        }.getOrElse{
+//            logger.info("Resource bundle is not found - localization is not available.")
+//            null
+//        }
+//
+//        val fxml = s"${getClass.getSimpleName.toLowerCase}.fxml"
+//        logger.info(s"Assuming fxml location as '$fxml'")
+//
+//        new FXMLLoader(getClass.getResource(fxml).toURI.toURL, resourceBundle)
+//    }
+
+    @Inject protected var loader: FXMLLoader = _
+
+    lazy val root: Parent = {
 
         // load resource bundle, null if not found
         val resourceBundle = Try{
@@ -85,10 +107,12 @@ class FXMLView extends View {
         val fxml = s"${getClass.getSimpleName.toLowerCase}.fxml"
         logger.info(s"Assuming fxml location as '$fxml'")
 
-        new FXMLLoader(getClass.getResource(fxml).toURI.toURL, resourceBundle)
-    }
+        loader.setRoot(null)
+        loader.setLocation(getClass.getResource(fxml).toURI.toURL)
+        loader.setResources(resourceBundle)
 
-    protected lazy val root: Parent = loader.load()
+        loader.load()
+    }
 
     final def getController[T]: T = loader.getController[T]
 

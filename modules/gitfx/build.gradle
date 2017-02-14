@@ -1,0 +1,9 @@
+apply plugin: 'application'
+
+mainClassName = 'org.gitfx.GitFXApp'
+
+dependencies {
+    compile project(':twisterfx-core')
+    compile 'com.gluonhq:ignite-spring:1.0.2'
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+}

@@ -4,12 +4,10 @@ import java.util.Locale
 import javafx.application.Application
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.stage.Stage
-
-import com.gluonhq.ignite.DIContext
 import javax.inject.{Inject, Named}
 
-import com.typesafe.scalalogging.{LazyLogging, Logger}
-import org.twisterfx._
+import com.gluonhq.ignite.DIContext
+import com.typesafe.scalalogging.LazyLogging
 
 
 /**

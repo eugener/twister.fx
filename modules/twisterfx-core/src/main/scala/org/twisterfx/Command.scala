@@ -1,6 +1,7 @@
 package org.twisterfx
 
 import java.util
+import java.util.Collections
 import javafx.beans.binding.Bindings
 import javafx.beans.property._
 import javafx.collections.ListChangeListener.Change
@@ -69,23 +70,6 @@ object Command {
         cmd
     }
 
-    def group(text: String, graphic: Node = null)(subCommands: Command* ): Command = {
-        new CommandGroup(text)(subCommands:_*)
-    }
-
-    def check(text: String, graphic: Node = null): Command = {
-        val cmd = new CommandCheck
-        cmd.text = text
-        cmd.graphic = graphic
-        cmd
-    }
-
-    def radio( text: String, graphic: Node = null, groupId: String ): Command = {
-        val cmd = new CommandRadio(groupId)
-        cmd.text = text
-        cmd.graphic = graphic
-        cmd
-    }
 }
 
 trait MutedCommand extends Command {
@@ -104,26 +88,37 @@ trait Selectable  {
 /**
   * Group of commands with common name.
   * Represented by dropdown button or submenu item
-  * @param groupText group text
+  * @param text group text
   * @param subcommands commands in the group
   */
-class CommandGroup( groupText: String )( subcommands: Command* ) extends MutedCommand {
-    text = groupText
-    val commands: ObservableList[Command] = FXCollections.observableArrayList[Command]()
-    Option(subcommands).foreach( cmds => commands.addAll(cmds.asJava))
+class CommandGroup(text: String, graphic: Node = null )(subcommands: Command* ) extends MutedCommand {
+
+    textProperty.set(text)
+    graphicProperty.set(graphic)
+
+    val commands: ObservableList[Command] = FXCollections.observableArrayList[Command](
+        Option(subcommands).map(_.asJavaCollection).getOrElse(Collections.emptyList())
+    )
 
 }
 
 /**
   * Command represented by check menu item or toggle check button
   */
-class CommandCheck extends MutedCommand with Selectable
+class CommandCheck(text: String, graphic: Node = null ) extends MutedCommand with Selectable {
+    textProperty.set(text)
+    graphicProperty.set(graphic)
+
+}
 
 /**
   * Command represented by radio menu item or toggle radio button
   * @param groupId allows for grouping of radio items using toggle groups
   */
-class CommandRadio( val groupId: String ) extends MutedCommand with Selectable
+ class CommandRadio( text: String, graphic: Node = null)(val groupId: String ) extends MutedCommand with Selectable {
+    textProperty.set(text)
+    graphicProperty.set(graphic)
+ }
 
 /**
   * Represents separator either for toolbar or menu
