@@ -134,10 +134,10 @@ object CommandTools {
         /**
           * Create a button bound the command properties.
           * MenuButton is created for CommandGroup
-          * @param contentDisplay buttons content display type
+          * @param graphicOnly show only button graphics
           * @return newly created button
           */
-        def toButton( contentDisplay: ContentDisplay = null )( implicit groupCache: mutable.Map[String, ToggleGroup] = mutable.Map() ): ButtonBase = {
+        def toButton( graphicOnly: Boolean = false )( implicit groupCache: mutable.Map[String, ToggleGroup] = mutable.Map() ): ButtonBase = {
 
             val button = cmd match {
 
@@ -161,7 +161,11 @@ object CommandTools {
                     btn
             }
 
-            Option(contentDisplay).foreach(button.setContentDisplay)
+            if ( graphicOnly) {
+                Bindings.when(button.graphicProperty().isNotNull)
+                  .`then`(ContentDisplay.GRAPHIC_ONLY)
+                  .otherwise(ContentDisplay.CENTER)
+            }
 
             button.textProperty.bind(cmd.textProperty)
             button.graphicProperty().bind(cmd.graphicProperty)
@@ -266,7 +270,7 @@ object CommandTools {
                                 .otherwise(Orientation.HORIZONTAL)
                         )
                         separator
-                    case _: Command => cmd.toButton(ContentDisplay.GRAPHIC_ONLY)
+                    case _: Command => cmd.toButton(graphicOnly = true)
                 }
 
                 tb.getItems.add(item)
