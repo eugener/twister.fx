@@ -26,6 +26,7 @@ abstract class App() extends scala.App with LazyLogging {
      * Application DI context. Has to be implemented in the actual application
      */
     protected def diContext: DIContext
+    protected val stylesheetName: String = null
 
     // Root view. Injected by name
     @Inject
@@ -35,6 +36,16 @@ abstract class App() extends scala.App with LazyLogging {
     protected[twisterfx] final def start(primaryStage: Stage): Unit = {
 
         diContext.init()
+        primaryStage.sceneProperty().addListener{ (_,_,scene) =>
+            //TODO remove $ from name
+            val cssName = Option(stylesheetName).getOrElse(s"/${getClass.getSimpleName.replaceAll("$", "").toLowerCase}.css")
+            try {
+                Option(scene).foreach(_.getStylesheets.add(cssName))
+            } catch {
+                case _: Throwable => logger.error(s"Stylesheet '$cssName' is not found.")
+            }
+        }
+
 
         //TODO apply stylesheets
         Option(view) match {
@@ -44,6 +55,8 @@ abstract class App() extends scala.App with LazyLogging {
                 //TODO better stage configuration is needed
                 v.assignTo(primaryStage)
         }
+
+
         beforeShow()
         primaryStage.show()
 
