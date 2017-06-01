@@ -26,7 +26,7 @@ abstract class App() extends scala.App with LazyLogging {
      * Application DI context. Has to be implemented in the actual application
      */
     protected def diContext: DIContext
-    protected val stylesheetName: String = null
+    protected lazy val stylesheetName: String = s"/${getClass.getSimpleName.replaceAll("[$]", "").toLowerCase}.css"
 
     // Root view. Injected by name
     @Inject
@@ -36,18 +36,17 @@ abstract class App() extends scala.App with LazyLogging {
     protected[twisterfx] final def start(primaryStage: Stage): Unit = {
 
         diContext.init()
+
+        // Make sure the application stylesheet is applied
         primaryStage.sceneProperty().addListener{ (_,_,scene) =>
-            //TODO remove $ from name
-            val cssName = Option(stylesheetName).getOrElse(s"/${getClass.getSimpleName.replaceAll("$", "").toLowerCase}.css")
             try {
-                Option(scene).foreach(_.getStylesheets.add(cssName))
+                Option(scene).foreach(_.getStylesheets.add(stylesheetName))
             } catch {
-                case _: Throwable => logger.error(s"Stylesheet '$cssName' is not found.")
+                case _: Throwable => logger.error(s"Stylesheet '$stylesheetName' is not found.")
             }
         }
 
-
-        //TODO apply stylesheets
+        // Assign primary view if available
         Option(view) match {
             case None    => logger.error( "Root view was not found" )
             case Some(v) =>
