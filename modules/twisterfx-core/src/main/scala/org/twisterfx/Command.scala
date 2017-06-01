@@ -132,7 +132,7 @@ object CommandTools {
     implicit class CommandImplicits( cmd: Command ) {
 
         /**
-          * Create a button bound the command properties.
+          * Create a button bound to the command properties.
           * MenuButton is created for CommandGroup
           * @param contentDisplay buttons content display type
           * @return newly created button
@@ -164,7 +164,7 @@ object CommandTools {
             Option(contentDisplay).foreach(button.setContentDisplay)
 
             button.textProperty.bind(cmd.textProperty)
-            button.graphicProperty().bind(cmd.graphicProperty)
+            button.graphicProperty.bind(cmd.graphicProperty)
             button.disableProperty.bindBidirectional(cmd.disabledProperty)
             bindStyleClass(cmd.styleClass,button.getStyleClass)
 

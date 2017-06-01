@@ -15,7 +15,7 @@ import scala.util.Try
   * Base for all views in the application
   */
 @Named
-trait View extends LazyLogging {
+trait View extends LazyLogging { //TODO logging framework should be chosen by the app
 
     // root node
     val root: Parent
@@ -29,12 +29,7 @@ trait View extends LazyLogging {
     private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
     lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProperty.getReadOnlyProperty
 
-    final def assignTo(
-                 stage: Stage = new Stage(),
-                 owner: Window = null,
-                 modality: Modality = null,
-                 style: StageStyle = null ): Stage = {
-
+    final def assignTo( stage: Stage = new Stage(),  owner: Window = null,  modality: Modality = null, style: StageStyle = null ): Stage = {
         sceneProperty.set(new Scene(root))
         stage.setScene(scene.get())
         stage.titleProperty.bind(titleProperty)
