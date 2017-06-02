@@ -35,9 +35,6 @@
               </menus>
             </MenuBar>
             <ToolBar fx:id="toolbar" prefHeight="40.0" prefWidth="200.0">
-              <items>
-                <Button mnemonicParsing="false" text="Button" />
-              </items>
             </ToolBar>
          </children>
       </VBox>

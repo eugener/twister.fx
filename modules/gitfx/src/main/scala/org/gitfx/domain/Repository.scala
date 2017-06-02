@@ -6,9 +6,11 @@ import java.nio.file.Path
 import org.eclipse.jgit.lib.{Repository => JGitRepo}
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
+import scala.util.Try
+
 object Repository {
 
-   def open( location: Path ): Repository = new Repository(location)
+   def open( location: Path ): Try[Repository] = Try(new Repository(location))
 
 }
 
