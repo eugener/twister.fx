@@ -69,26 +69,15 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 @Named
 class FXMLView extends View {
 
-//    protected lazy val loader: FXMLLoader = {
-//
-//        // load resource bundle, null if not found
-//        val resourceBundle = Try{
-//            val bundleName = getClass.getName.toLowerCase
-//            ResourceBundle.getBundle(bundleName, AppContext.locale)
-//        }.getOrElse{
-//            logger.info("Resource bundle is not found - localization is not available.")
-//            null
-//        }
-//
-//        val fxml = s"${getClass.getSimpleName.toLowerCase}.fxml"
-//        logger.info(s"Assuming fxml location as '$fxml'")
-//
-//        new FXMLLoader(getClass.getResource(fxml).toURI.toURL, resourceBundle)
-//    }
-
     @Inject protected var loader: FXMLLoader = _
 
-    lazy val root: Parent = {
+    lazy val root: Parent = loadRoot()
+
+    final def getController[T]: T = loader.getController[T]
+
+
+
+    private def loadRoot(): Parent = {
 
         // load resource bundle, null if not found
         val resourceBundle = Try{
@@ -108,8 +97,6 @@ class FXMLView extends View {
 
         loader.load()
     }
-
-    final def getController[T]: T = loader.getController[T]
 
 }
 
