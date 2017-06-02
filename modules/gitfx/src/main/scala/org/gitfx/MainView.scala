@@ -1,6 +1,7 @@
 package org.gitfx
 
 import java.io.File
+import java.nio.file.Paths
 import javafx.fxml.FXML
 import javafx.scene.control.{MenuBar, Tab, TabPane, ToolBar}
 
@@ -26,7 +27,7 @@ class MainViewController {
 
   def initialize(): Unit = {
 
-    val repo = Repository.open( new File("/Users/exr0bs5/Projects/highbrow"))
+    val repo = Repository.open( Paths.get("/Users/exr0bs5/Projects/highbrow"))
 
     val repoView = context.getBean(classOf[RepositoryView])
     tabs.getTabs.add( new Tab( repo.name, repoView.root))
