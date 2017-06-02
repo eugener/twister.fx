@@ -62,12 +62,12 @@ abstract class App() extends scala.App with LazyLogging {
     }
 
     /**
-      * Invoked just before showing the primary stage show
+      * Invoked just before showing the primary stage shows up
       */
     def beforeShow() {}
 
     /**
-      * Invoke on application stop
+      * Invoked on application stop
       */
     def stop() {}
 
@@ -87,7 +87,7 @@ object AppContext {
     // global application wide locale
     // locale property
     lazy val localeProperty: ObjectProperty[Locale] = new SimpleObjectProperty[Locale]()
-    def locale: Locale = localeProperty.value
-    def locale_=( value: Locale ): Unit = localeProperty.value = value
+    def locale: Locale = localeProperty.get
+    def locale_=( value: Locale ): Unit = localeProperty.set(value)
 
 }

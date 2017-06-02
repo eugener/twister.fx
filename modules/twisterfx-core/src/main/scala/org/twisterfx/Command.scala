@@ -72,10 +72,16 @@ object Command {
 
 }
 
+/**
+  * Command which performs no action
+  */
 trait MutedCommand extends Command {
     final override def perform( e: ActionEvent ): Unit = {} // no-op
 }
 
+/**
+  * Trait to add a selectable property to commands
+  */
 trait Selectable  {
 
     // selected used mostly on check and radio buttons and menu items

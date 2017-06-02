@@ -22,8 +22,8 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
     // title property
     lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title", getClass.getSimpleName )
-    def title: String = titleProperty.value
-    def title_=( value: String ): Unit = titleProperty.value = value
+    def title: String = titleProperty.get
+    def title_=( value: String ): Unit = titleProperty.set(value)
 
     // scene property
     private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
