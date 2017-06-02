@@ -15,26 +15,21 @@ import scala.util.Try
   * Base for all views in the application
   */
 @Named
-trait View extends LazyLogging {
+trait View extends LazyLogging { //TODO logging framework should be chosen by the app
 
     // root node
     val root: Parent
 
     // title property
     lazy val titleProperty: StringProperty = new SimpleStringProperty(this, "title", getClass.getSimpleName )
-    def title: String = titleProperty.value
-    def title_=( value: String ): Unit = titleProperty.value = value
+    def title: String = titleProperty.get
+    def title_=( value: String ): Unit = titleProperty.set(value)
 
     // scene property
     private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
     lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProperty.getReadOnlyProperty
 
-    final def assignTo(
-                 stage: Stage = new Stage(),
-                 owner: Window = null,
-                 modality: Modality = null,
-                 style: StageStyle = null ): Stage = {
-
+    final def assignTo( stage: Stage = new Stage(),  owner: Window = null,  modality: Modality = null, style: StageStyle = null ): Stage = {
         sceneProperty.set(new Scene(root))
         stage.setScene(scene.get())
         stage.titleProperty.bind(titleProperty)
@@ -74,26 +69,15 @@ trait View extends LazyLogging {
 @Named
 class FXMLView extends View {
 
-//    protected lazy val loader: FXMLLoader = {
-//
-//        // load resource bundle, null if not found
-//        val resourceBundle = Try{
-//            val bundleName = getClass.getName.toLowerCase
-//            ResourceBundle.getBundle(bundleName, AppContext.locale)
-//        }.getOrElse{
-//            logger.info("Resource bundle is not found - localization is not available.")
-//            null
-//        }
-//
-//        val fxml = s"${getClass.getSimpleName.toLowerCase}.fxml"
-//        logger.info(s"Assuming fxml location as '$fxml'")
-//
-//        new FXMLLoader(getClass.getResource(fxml).toURI.toURL, resourceBundle)
-//    }
-
     @Inject protected var loader: FXMLLoader = _
 
-    lazy val root: Parent = {
+    lazy val root: Parent = loadRoot()
+
+    final def getController[T]: T = loader.getController[T]
+
+
+
+    private def loadRoot(): Parent = {
 
         // load resource bundle, null if not found
         val resourceBundle = Try{
@@ -113,8 +97,6 @@ class FXMLView extends View {
 
         loader.load()
     }
-
-    final def getController[T]: T = loader.getController[T]
 
 }
 

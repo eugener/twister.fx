@@ -26,6 +26,7 @@ abstract class App() extends scala.App with LazyLogging {
      * Application DI context. Has to be implemented in the actual application
      */
     protected def diContext: DIContext
+    protected lazy val stylesheetName: String = s"/${getClass.getSimpleName.replaceAll("[$]", "").toLowerCase}.css"
 
     // Root view. Injected by name
     @Inject
@@ -36,7 +37,16 @@ abstract class App() extends scala.App with LazyLogging {
 
         diContext.init()
 
-        //TODO apply stylesheets
+        // Make sure the application stylesheet is applied
+        primaryStage.sceneProperty().addListener{ (_,_,scene) =>
+            try {
+                Option(scene).foreach(_.getStylesheets.add(stylesheetName))
+            } catch {
+                case _: Throwable => logger.error(s"Stylesheet '$stylesheetName' is not found.")
+            }
+        }
+
+        // Assign primary view if available
         Option(view) match {
             case None    => logger.error( "Root view was not found" )
             case Some(v) =>
@@ -44,18 +54,20 @@ abstract class App() extends scala.App with LazyLogging {
                 //TODO better stage configuration is needed
                 v.assignTo(primaryStage)
         }
+
+
         beforeShow()
         primaryStage.show()
 
     }
 
     /**
-      * Invoked just before showing the primary stage show
+      * Invoked just before showing the primary stage shows up
       */
     def beforeShow() {}
 
     /**
-      * Invoke on application stop
+      * Invoked on application stop
       */
     def stop() {}
 
@@ -75,7 +87,7 @@ object AppContext {
     // global application wide locale
     // locale property
     lazy val localeProperty: ObjectProperty[Locale] = new SimpleObjectProperty[Locale]()
-    def locale: Locale = localeProperty.value
-    def locale_=( value: Locale ): Unit = localeProperty.value = value
+    def locale: Locale = localeProperty.get
+    def locale_=( value: Locale ): Unit = localeProperty.set(value)
 
 }

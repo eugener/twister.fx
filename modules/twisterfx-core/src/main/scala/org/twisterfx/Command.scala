@@ -72,10 +72,16 @@ object Command {
 
 }
 
+/**
+  * Command which performs no action
+  */
 trait MutedCommand extends Command {
     final override def perform( e: ActionEvent ): Unit = {} // no-op
 }
 
+/**
+  * Trait to add a selectable property to commands
+  */
 trait Selectable  {
 
     // selected used mostly on check and radio buttons and menu items
@@ -132,7 +138,7 @@ object CommandTools {
     implicit class CommandImplicits( cmd: Command ) {
 
         /**
-          * Create a button bound the command properties.
+          * Create a button bound to the command properties.
           * MenuButton is created for CommandGroup
           * @param graphicOnly show only button graphics
           * @return newly created button
@@ -168,7 +174,7 @@ object CommandTools {
             }
 
             button.textProperty.bind(cmd.textProperty)
-            button.graphicProperty().bind(cmd.graphicProperty)
+            button.graphicProperty.bind(cmd.graphicProperty)
             button.disableProperty.bindBidirectional(cmd.disabledProperty)
             bindStyleClass(cmd.styleClass,button.getStyleClass)
 

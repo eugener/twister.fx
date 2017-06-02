@@ -12,14 +12,14 @@ import scala.language.implicitConversions
 
 package object twisterfx {
 
-    // Simpler API for properties
-    implicit class PropertyImplicits[T]( objectValue: WritableObjectValue[T]  ) {
-
-        def value: T = objectValue.get()
-        def value_=( value: T ) : Unit = objectValue.set(value)
-
-        def apply(): T = value
-    }
+//    // Simpler API for properties
+//    implicit class PropertyImplicits[T]( objectValue: WritableObjectValue[T]  ) {
+//
+//        def value: T = objectValue.get()
+//        def value_=( value: T ) : Unit = objectValue.set(value)
+//
+//        def apply(): T = value
+//    }
 
     /**
       * Ensure execution of action on FX thread
