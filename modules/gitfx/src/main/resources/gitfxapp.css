@@ -1,3 +1,6 @@
+.root {
+}
+
 .split-pane > .split-pane-divider {
     /*-fx-background-color: transparent;*/
     -fx-border-width: 0;
