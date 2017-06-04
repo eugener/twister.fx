@@ -1,8 +1,18 @@
 .root {
+    -fx-accent: #0093ff;
+    -fx-focus-color: -fx-accent;
 }
 
 .split-pane > .split-pane-divider {
     /*-fx-background-color: transparent;*/
     -fx-border-width: 0;
     -fx-padding: 0 1 0 1;
+}
+
+.split-pane:horizontal > .split-pane-divider {
+    -fx-padding: 0 .05mm 0 .05mm;
+}
+
+.split-pane:vertical > .split-pane-divider {
+    -fx-padding: .05mm 0 .05mm 0;
 }

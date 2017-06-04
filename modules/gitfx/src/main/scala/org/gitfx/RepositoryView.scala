@@ -1,7 +1,7 @@
 package org.gitfx
 
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.time.format.{DateTimeFormatter, FormatStyle}
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.fxml.FXML
 import javafx.geometry.{Insets, Pos}
@@ -34,7 +34,7 @@ class RepositoryViewController {
 
     def initialize(): Unit = {
 
-
+        commitList.setMinWidth(250)
         commitList.setCellFactory(_ => new CommitCell())
 
         repositoryProperty.addListener((_, _, repo) => refreshRepo())
@@ -61,8 +61,7 @@ private class CommitCell extends ListCell[JGitCommit] {
 
 private class CommitPanel extends VBox {
 
-    val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
+    setMinWidth(250)
 
     val committerName = new Label()
     val date = new Label()
@@ -88,22 +87,23 @@ private class CommitPanel extends VBox {
 
     getChildren.addAll(firstRow, secondRow)
 
-    //  setMaxWidth(250)
-    setPrefWidth(250)
-
     private var commitOption: Option[JGitCommit] = None
 
     def commit: JGitCommit = commitOption.get
 
     def commit_=(value: JGitCommit): Unit = {
+
         commitOption = Option(value)
 
         committerName.setText(commitOption.map(_.getAuthorIdent.getName).orNull)
+
         id.setText(commitOption.map(_.getName.take(8)).orNull)
+
         comment.setText(commitOption.map(_.getShortMessage).orNull)
+
         date.setText(commitOption.map { c =>
             val date = c.getAuthorIdent.getWhen.toInstant.atZone(ZoneId.systemDefault).toLocalDate
-            date.format(format)
+            date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
         }.orNull)
     }
 

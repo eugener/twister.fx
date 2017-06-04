@@ -18,12 +18,12 @@ object Repository {
 
 }
 
-case class Repository( val location: Path ) {
+case class Repository( location: Path ) {
 
    import Repository._
 
    private val gitDir = if ( location.endsWith(GIT_DIR) ) location else Paths.get(location.toString).resolve(GIT_DIR)
-   require( Files.exists(gitDir))
+   require( Files.exists(gitDir), "Git repository is not found")
 
    private val repository: JGitRepo = {
       new FileRepositoryBuilder()

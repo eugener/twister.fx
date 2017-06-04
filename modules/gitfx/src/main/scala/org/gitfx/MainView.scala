@@ -1,8 +1,9 @@
 package org.gitfx
 
 import javafx.fxml.FXML
-import javafx.scene.control.{MenuBar, Tab, TabPane, ToolBar}
-import javafx.stage.{DirectoryChooser, FileChooser}
+import javafx.scene.control.Alert.AlertType
+import javafx.scene.control._
+import javafx.stage.DirectoryChooser
 
 import org.gitfx.domain.Repository
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,7 +53,12 @@ class MainViewController {
                 val controller = repoView.getController[RepositoryViewController]
                 controller.repository = repo
 
-            case Failure(ex) => ex.printStackTrace()
+            case Failure(ex) =>
+                val alert = new Alert(AlertType.ERROR)
+                alert.initOwner(toolbar.getScene.getWindow)
+                alert.setContentText(ex.getLocalizedMessage)
+                alert.setHeaderText(null)
+                alert.showAndWait()
 
         }
 
