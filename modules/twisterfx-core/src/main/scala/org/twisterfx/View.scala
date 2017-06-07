@@ -25,21 +25,30 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
     def title: String = titleProperty.get
     def title_=( value: String ): Unit = titleProperty.set(value)
 
-    // scene property
-    private lazy val sceneProperty = new ReadOnlyObjectWrapper[Scene](this, "scene", null)
-    lazy val scene: ReadOnlyObjectProperty[Scene] = sceneProperty.getReadOnlyProperty
+    def sceneProperty: ReadOnlyObjectProperty[Scene] = root.sceneProperty()
 
-    final def assignTo( stage: Stage = new Stage(),  owner: Window = null,  modality: Modality = null, style: StageStyle = null ): Stage = {
-        sceneProperty.set(new Scene(root))
-        stage.setScene(scene.get())
+    /**
+      * Retrieves the window view belongs to
+      * @return
+      */
+    def getWindow: Option[Window] = Option(sceneProperty.get).map(_.getWindow)
+
+    final def assignTo( stage: Stage = new Stage(),
+                        owner: Window = null,
+                        modality: Modality = null,
+                        style: StageStyle = null,
+                        sizeToScene: Boolean = true,
+                        centerOnScreen: Boolean = true): Stage = {
+        val scene = new Scene(root)
+        stage.setScene(scene)
         stage.titleProperty.bind(titleProperty)
         Option(owner).foreach( stage.initOwner )
         Option(modality).foreach(stage.initModality)
         Option(style).foreach(stage.initStyle)
-        stage.sizeToScene()
-        stage.centerOnScreen()
+        if (sizeToScene) stage.sizeToScene()
+        if (centerOnScreen) stage.centerOnScreen()
 
-        scene.addListener{ scene: Scene => Option(scene).foreach(_ => beforeShow())}
+        stage.sceneProperty().addListener{ scene: Scene => Option(scene).foreach(_ => beforeShow())}
 
         stage
     }
@@ -49,12 +58,20 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
       */
     def beforeShow(): Unit = {}
 
+    def show(owner: Window = null,
+             modality: Modality = null,
+             style: StageStyle = null,
+             sizeToScene: Boolean = true,
+             centerOnScreen: Boolean = true): Unit = {
+        assignTo(owner=owner, modality=modality, style=style, sizeToScene=sizeToScene, centerOnScreen=centerOnScreen).show()
+    }
+
     def showWindow(owner: Window = null, style: StageStyle = StageStyle.DECORATED): Unit = {
-        assignTo(owner = owner, style = style).show()
+        show(owner = owner, style = style)
     }
 
     def showModal(owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED): Unit = {
-        assignTo( owner = owner , modality = modality, style = style).show()
+        show( owner = owner , modality = modality, style = style)
     }
 
     //TODO Show as dialog?
@@ -74,7 +91,6 @@ class FXMLView extends View {
     lazy val root: Parent = loadRoot()
 
     final def getController[T]: T = loader.getController[T]
-
 
 
     private def loadRoot(): Parent = {
