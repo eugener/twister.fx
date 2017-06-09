@@ -22,37 +22,27 @@ trait Command {
 
     // text which usually shows up on the button ot menu item
     lazy val textProperty: StringProperty = new SimpleStringProperty
-
     def text: String = textProperty.get
-
     def text_=(value: String): Unit = textProperty.set(value)
 
     // long text is used mostly on tooltips
     lazy val longTextProperty: StringProperty = new SimpleStringProperty
-
     def longText: String = longTextProperty.get
-
     def longText_=(value: String): Unit = longTextProperty.set(value)
 
     // graphic shown on the buttons or menu items
     lazy val graphicProperty: ObjectProperty[Node] = new SimpleObjectProperty[Node]
-
     def graphic: Node = graphicProperty.get
-
     def graphic_=(value: Node): Unit = graphicProperty.set(value)
 
     // disabled status propagated to associated controls
     lazy val disabledProperty: BooleanProperty = new SimpleBooleanProperty
-
     def disabled: Boolean = disabledProperty.get()
-
     def disabled_=(value: Boolean): Unit = disabledProperty.set(value)
 
     // accelerator assigned to the action
     lazy val acceleratorProperty: ObjectProperty[KeyCombination] = new SimpleObjectProperty[KeyCombination]
-
     def accelerator: KeyCombination = acceleratorProperty.get
-
     def accelerator_=(value: KeyCombination): Unit = acceleratorProperty.set(value)
 
     // style classes propagated to related controls
@@ -72,14 +62,20 @@ trait Command {
   */
 object Command {
 
-    def apply(text: String, graphic: Node = null, longText: String = null)(action: ActionEvent => Unit): Command = {
-        val cmd = new Command {
-            override def perform(e: ActionEvent): Unit = action(e)
-        }
+    def apply( text: String, graphic: Node = null, longText: String = null)(action: ActionEvent => Unit): Command = {
+        val cmd = new Command { override def perform(e: ActionEvent): Unit = action(e) }
         cmd.text = text
         cmd.graphic = graphic
+        cmd.longText = longText
         cmd
+    }
 
+    def apply( text: String, graphic: Node = null, longText: String = null)(action: => Unit): Command = {
+        val cmd = new Command { override def perform(e: ActionEvent): Unit = action }
+        cmd.text = text
+        cmd.graphic = graphic
+        cmd.longText = longText
+        cmd
     }
 
 }
