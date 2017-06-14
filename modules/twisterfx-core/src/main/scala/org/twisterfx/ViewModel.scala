@@ -1,34 +1,40 @@
 package org.twisterfx
 
+import javafx.beans.property.{SimpleStringProperty, StringProperty}
 import javafx.beans.value.WritableObjectValue
 
 import scala.collection.mutable
+import scala.language.reflectiveCalls
 
-abstract class ViewModel[T]( val domainEntity: T ) {
+abstract class ViewModel[ENTITY]( val domainEntity: ENTITY ) {
 
-    private val knownProps: mutable.Set[PropBinding[_,_]] = mutable.Set[PropBinding[_,_]]()
+    private val knownProperties = mutable.Set[PropertyBinding[_,_]]()
 
-    final def bind[P <: WritableObjectValue[T]]( prop: P ): P = {
-          val binding = PropBinding( prop )
-          knownProps += binding
-          binding.modelProp
+    // Creates property bound to the source property and registers binding in the view model
+    final def bind[PROPERTY <: WritableObjectValue[ENTITY]](sourceProperty: PROPERTY): PROPERTY = {
+          val binding = PropertyBinding[PROPERTY,ENTITY](sourceProperty)
+          knownProperties += binding
+          binding.modelProperty
     }
 
-    final def commit(): Unit = knownProps.foreach(_.commit())
-    final def rollback(): Unit = knownProps.foreach(_.rollback())
-    final def isDirty: Boolean = knownProps.exists(_.isDirty)
+    final def commit(): Unit = knownProperties.foreach(_.commit())
+    final def rollback(): Unit = knownProperties.foreach(_.rollback())
+    final def isDirty: Boolean = knownProperties.exists(_.isDirty)
+
 
 }
 
-private case class PropBinding[P <: WritableObjectValue[T], T](domainProp: P) {
+private case class PropertyBinding[ PROPERTY <: WritableObjectValue[TYPE], TYPE ](domainProperty: PROPERTY) {
 
-    require( domainProp != null )
+    require( domainProperty != null )
 
-    val modelProp: P = domainProp.getClass.newInstance()
+    val modelProperty: PROPERTY = domainProperty.getClass.newInstance()
 
-    def commit(): Unit = domainProp.set(modelProp.get)
-    def rollback(): Unit = modelProp.set(domainProp.get)
+    def commit(): Unit = domainProperty.set(modelProperty.get)
+    def rollback(): Unit = modelProperty.set(domainProperty.get)
 
-    def isDirty: Boolean = modelProp.get != domainProp.get
+    def isDirty: Boolean = modelProperty.get != domainProperty.get
 
 }
+
+
