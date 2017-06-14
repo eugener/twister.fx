@@ -74,7 +74,13 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
         show( owner = owner , modality = modality, style = style)
     }
 
-    //TODO Show as dialog?
+    def showDialog[M](owner: Window = null): Unit = {
+        import javafx.scene.control.Dialog
+        val dialog = new Dialog[M]
+        val dialogPane = dialog.getDialogPane
+        dialogPane.setContent(root)
+        dialog.showAndWait
+    }
 
 }
 
