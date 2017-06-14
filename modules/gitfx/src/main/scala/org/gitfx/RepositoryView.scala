@@ -24,9 +24,7 @@ class RepositoryView extends FXMLView
 class RepositoryViewController {
 
     val repositoryProperty: ObjectProperty[Repository] = new SimpleObjectProperty[Repository]()
-
     def repository: Repository = repositoryProperty.get
-
     def repository_=(value: Repository): Unit = repositoryProperty.set(value)
 
     @FXML
@@ -37,11 +35,11 @@ class RepositoryViewController {
         commitList.setMinWidth(250)
         commitList.setCellFactory(_ => new CommitCell())
 
-        repositoryProperty.addListener((_, _, repo) => refreshRepo())
+        repositoryProperty.addListener((_, _, repo) => refreshRepo(repo))
     }
 
-    def refreshRepo(): Unit = {
-        commitList.getItems.setAll(repository.getCommits.asJavaCollection)
+    def refreshRepo( repo: Repository ): Unit = {
+        commitList.getItems.setAll(repo.getCommits.asJavaCollection)
     }
 
 }
@@ -52,7 +50,6 @@ private class CommitCell extends ListCell[JGitCommit] {
     setGraphic(pane)
     setText(null)
 
-
     override def updateItem(item: JGitCommit, empty: Boolean): Unit = {
         super.updateItem(item, empty)
         pane.commit = if (empty) null else item
@@ -61,31 +58,12 @@ private class CommitCell extends ListCell[JGitCommit] {
 
 private class CommitPanel extends VBox {
 
-    setMinWidth(250)
-
     val committerName = new Label()
     val date = new Label()
     val id = new Label()
     val comment = new Label()
 
-
-    committerName.setTextOverrun(OverrunStyle.ELLIPSIS)
-    committerName.setAlignment(Pos.CENTER_LEFT)
-
-    comment.setTextOverrun(OverrunStyle.ELLIPSIS)
-
-
-    val firstRow = new BorderPane(committerName)
-    firstRow.setRight(date)
-    firstRow.setPadding(new Insets(5))
-    BorderPane.setAlignment(committerName, Pos.CENTER_LEFT)
-
-    val secondRow = new BorderPane(comment)
-    secondRow.setLeft(id)
-    secondRow.setPadding(new Insets(5))
-    BorderPane.setAlignment(comment, Pos.CENTER_LEFT)
-
-    getChildren.addAll(firstRow, secondRow)
+    initUI()
 
     private var commitOption: Option[JGitCommit] = None
 
@@ -95,17 +73,39 @@ private class CommitPanel extends VBox {
 
         commitOption = Option(value)
 
-        committerName.setText(commitOption.map(_.getAuthorIdent.getName).orNull)
-
-        id.setText(commitOption.map(_.getName.take(8)).orNull)
-
-        comment.setText(commitOption.map(_.getShortMessage).orNull)
-
-        date.setText(commitOption.map { c =>
+        updateLabel(committerName)(_.getAuthorIdent.getName)
+        updateLabel(id)(_.getName.take(8))
+        updateLabel(comment)(_.getShortMessage)
+        updateLabel(date){ c =>
             val date = c.getAuthorIdent.getWhen.toInstant.atZone(ZoneId.systemDefault).toLocalDate
             date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
-        }.orNull)
+        }
+
     }
 
+    def updateLabel(lb: Label)(text: JGitCommit => String ): Unit = lb.setText(commitOption.map(text).orNull)
+
+    def initUI(): Unit = {
+
+        setMinWidth(250)
+
+        committerName.setTextOverrun(OverrunStyle.ELLIPSIS)
+        committerName.setAlignment(Pos.CENTER_LEFT)
+
+        comment.setTextOverrun(OverrunStyle.ELLIPSIS)
+
+        val firstRow = new BorderPane(committerName)
+        firstRow.setRight(date)
+        firstRow.setPadding(new Insets(5))
+        BorderPane.setAlignment(committerName, Pos.CENTER_LEFT)
+
+        val secondRow = new BorderPane(comment)
+        secondRow.setLeft(id)
+        secondRow.setPadding(new Insets(5))
+        BorderPane.setAlignment(comment, Pos.CENTER_LEFT)
+
+        getChildren.addAll(firstRow, secondRow)
+
+    }
 
 }
