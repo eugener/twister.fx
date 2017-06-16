@@ -1,8 +1,6 @@
 package org.gitfx
 
-import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.scene.Parent
 import javafx.scene.control.Alert.AlertType
 import javafx.scene.control._
 import javafx.scene.layout.VBox
@@ -12,8 +10,8 @@ import org.gitfx.domain.Repository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
-import org.twisterfx.{Command, FXMLView, View}
 import org.twisterfx.CommandTools._
+import org.twisterfx.{Command, FXMLView, View}
 
 import scala.util.{Failure, Success}
 
@@ -70,7 +68,7 @@ class MainViewController {
     }
 
     def showInfo(): Unit = {
-       new RepoInfo().showDialog()
+       new RepoInfo().showDialog(resizible = true)
     }
 
 
@@ -78,6 +76,8 @@ class MainViewController {
 
 class RepoInfo extends View {
     override val root: VBox = new VBox(10)
+
+    title = "Repository Information"
 
     val txFullName     = new TextField()
     val txEmailAddress = new TextField()

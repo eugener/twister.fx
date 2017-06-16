@@ -3,12 +3,14 @@ package org.twisterfx
 import java.util.ResourceBundle
 import javafx.beans.property._
 import javafx.fxml.FXMLLoader
+import javafx.scene.control.ButtonType
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
 import javax.inject.{Inject, Named}
 
 import com.typesafe.scalalogging.LazyLogging
 
+import scala.compat.java8.OptionConverters._
 import scala.util.Try
 
 /**
@@ -74,12 +76,22 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
         show( owner = owner , modality = modality, style = style)
     }
 
-    def showDialog[M](owner: Window = null): Unit = {
-        import javafx.scene.control.Dialog
-        val dialog = new Dialog[M]
+    // TODO graphic for dialog
+    // TODO header for dialog
+    def showDialog[M](owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED, resizible: Boolean = false): Option[M] = {
+        val dialog = new javafx.scene.control.Dialog[M]
+        dialog.titleProperty().bind(titleProperty)
+        dialog.initOwner(owner)
+        dialog.initStyle(style)
+        dialog.initModality(modality)
+        dialog.setResizable(resizible)
+
         val dialogPane = dialog.getDialogPane
         dialogPane.setContent(root)
-        dialog.showAndWait
+        dialogPane.getButtonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
+//        dialogPane.setHeaderText("HEADER HEADER HEADER")
+
+        dialog.showAndWait.asScala
     }
 
 }
