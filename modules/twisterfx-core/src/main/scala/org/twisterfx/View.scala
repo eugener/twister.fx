@@ -27,6 +27,11 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
     def title: String = titleProperty.get
     def title_=( value: String ): Unit = titleProperty.set(value)
 
+    // resizable property
+    lazy val resizableProperty: BooleanProperty = new SimpleBooleanProperty(this, "resizable", false )
+    def resizable: Boolean = resizableProperty.get
+    def resizable_=( value: Boolean ): Unit = resizableProperty.set(value)
+
     def sceneProperty: ReadOnlyObjectProperty[Scene] = root.sceneProperty()
 
     /**
@@ -44,6 +49,7 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
         val scene = new Scene(root)
         stage.setScene(scene)
         stage.titleProperty.bind(titleProperty)
+        stage.resizableProperty().bindBidirectional(resizableProperty)
         Option(owner).foreach( stage.initOwner )
         Option(modality).foreach(stage.initModality)
         Option(style).foreach(stage.initStyle)
@@ -78,13 +84,13 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
     // TODO graphic for dialog
     // TODO header for dialog
-    def showDialog[M](owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED, resizible: Boolean = false): Option[M] = {
+    def showDialog[M](owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED ): Option[M] = {
         val dialog = new javafx.scene.control.Dialog[M]
         dialog.titleProperty().bind(titleProperty)
         dialog.initOwner(owner)
         dialog.initStyle(style)
         dialog.initModality(modality)
-        dialog.setResizable(resizible)
+        dialog.resizableProperty.bindBidirectional(resizableProperty)
 
         val dialogPane = dialog.getDialogPane
         dialogPane.setContent(root)
@@ -109,7 +115,6 @@ class FXMLView extends View {
     lazy val root: Parent = loadRoot()
 
     final def getController[T]: T = loader.getController[T]
-
 
     private def loadRoot(): Parent = {
 
