@@ -68,7 +68,7 @@ class MainViewController {
     }
 
     def showInfo(): Unit = {
-       new RepoInfo().showDialog(resizible = true)
+       new RepoInfo().showDialog(toolbar.getScene.getWindow)
     }
 
 

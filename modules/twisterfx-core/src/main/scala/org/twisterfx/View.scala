@@ -28,7 +28,7 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
     def title_=( value: String ): Unit = titleProperty.set(value)
 
     // resizable property
-    lazy val resizableProperty: BooleanProperty = new SimpleBooleanProperty(this, "resizable", false )
+    lazy val resizableProperty: BooleanProperty = new SimpleBooleanProperty(this, "resizable", true )
     def resizable: Boolean = resizableProperty.get
     def resizable_=( value: Boolean ): Unit = resizableProperty.set(value)
 
@@ -63,6 +63,7 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
     /**
       * Invoked just before the view is shown
+      * // TODO replace with property?
       */
     def beforeShow(): Unit = {}
 
