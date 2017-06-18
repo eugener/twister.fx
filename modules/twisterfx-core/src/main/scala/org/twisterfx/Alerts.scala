@@ -1,20 +1,28 @@
 package org.twisterfx
 
 import javafx.scene.control.Alert
+import javafx.scene.layout.BorderPane
+import javafx.stage.{Modality, Stage}
+
+import com.sun.javafx.stage.StageHelper
 
 
-object Alert {
+object Alerts {
 
     import java.io.{PrintWriter, StringWriter}
     import javafx.scene.control.Alert.AlertType
     import javafx.scene.control.{ButtonType, Label, TextArea}
-    import javafx.scene.layout.{GridPane, Priority}
+
+    import scala.collection.JavaConverters._
     import scala.compat.java8.OptionConverters._
 
 
+    private def getActiveStage: Option[Stage] =  StageHelper.getStages.asScala.find( _.isFocused)
 
     private def custom( alertType: AlertType, title: String, content: String, header: String = null): Alert = {
         val alert = new javafx.scene.control.Alert(alertType)
+        getActiveStage.foreach(alert.initOwner)
+        alert.initModality( Modality.WINDOW_MODAL)
         alert.setTitle(title)
         alert.setHeaderText(header)
         alert.setContentText(content)
@@ -34,10 +42,11 @@ object Alert {
         custom(AlertType.ERROR, title, content, header).showAndWait()
     }
 
-    def exception( title: String = "Exception", ex: Throwable,  header: String = null ): Unit = {
+    def exception( ex: Throwable, title: String = "Exception", header: String = null ): Unit = {
         val alert = new javafx.scene.control.Alert(AlertType.ERROR)
-        alert.setTitle("Exception")
+        alert.setTitle(title)
         alert.setHeaderText(header)
+        alert.setContentText(ex.getLocalizedMessage)
 
         val sw = new StringWriter
         val pw = new PrintWriter(sw)
@@ -51,16 +60,10 @@ object Alert {
         textArea.setWrapText(true)
         textArea.setMaxWidth(Double.MaxValue)
         textArea.setMaxHeight(Double.MaxValue)
-        GridPane.setVgrow(textArea, Priority.ALWAYS)
-        GridPane.setHgrow(textArea, Priority.ALWAYS)
 
-
-        val expContent = new GridPane
+        val expContent = new BorderPane(textArea)
+        expContent.setTop(label)
         expContent.setMaxWidth(Double.MaxValue)
-        expContent.add(label, 0, 0)
-        expContent.add(textArea, 0, 1)
-
-        // Set expandable Exception into the dialog pane.
         alert.getDialogPane.setExpandableContent(expContent)
 
         alert.showAndWait()

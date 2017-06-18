@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import org.twisterfx.CommandTools._
-import org.twisterfx.{Command, FXMLView, View}
+import org.twisterfx.{Alerts, Command, FXMLView, View}
 
 import scala.util.{Failure, Success}
 
@@ -68,7 +68,12 @@ class MainViewController {
     }
 
     def showInfo(): Unit = {
-       new RepoInfo().showDialog(toolbar.getScene.getWindow)
+       //new RepoInfo().showDialog(toolbar.getScene.getWindow)
+        try {
+            1/0
+        } catch {
+            case ex =>  Alerts.exception(ex)
+        }
     }
 
 
