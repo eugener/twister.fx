@@ -13,19 +13,30 @@ object Alerts {
     import javafx.scene.control.Alert.AlertType
     import javafx.scene.control.{ButtonType, Label, TextArea}
 
-    import scala.collection.JavaConverters._
     import scala.compat.java8.OptionConverters._
 
 
-    private def getActiveStage: Option[Stage] =  StageHelper.getStages.asScala.find( _.isFocused)
-
     private def custom( alertType: AlertType, title: String, content: String, header: String = null): Alert = {
         val alert = new javafx.scene.control.Alert(alertType)
-        getActiveStage.foreach(alert.initOwner)
+
         alert.initModality( Modality.WINDOW_MODAL)
         alert.setTitle(title)
         alert.setHeaderText(header)
         alert.setContentText(content)
+
+        getActiveStage.foreach{ stage =>
+
+            // assign active stage
+            alert.initOwner(stage)
+
+            // center alert on parent stage
+            val stageCenterX = stage.getX + stage.getWidth / 2d
+            val stageCenterY = stage.getY + stage.getHeight / 2d
+            alert.setX(stageCenterX - alert.getWidth / 2d)
+            alert.setY(stageCenterY - alert.getHeight / 2d)
+
+        }
+
         alert
     }
 
@@ -43,17 +54,12 @@ object Alerts {
     }
 
     def exception( ex: Throwable, title: String = "Exception", header: String = null ): Unit = {
-        val alert = new javafx.scene.control.Alert(AlertType.ERROR)
-        alert.setTitle(title)
-        alert.setHeaderText(header)
-        alert.setContentText(ex.getLocalizedMessage)
+        val alert = custom(AlertType.ERROR, title, ex.getLocalizedMessage, header)
 
         val sw = new StringWriter
         val pw = new PrintWriter(sw)
         ex.printStackTrace(pw)
         val exceptionText = sw.toString
-
-        val label = new Label("The exception stacktrace was:")
 
         val textArea = new TextArea(exceptionText)
         textArea.setEditable(false)
@@ -62,7 +68,7 @@ object Alerts {
         textArea.setMaxHeight(Double.MaxValue)
 
         val expContent = new BorderPane(textArea)
-        expContent.setTop(label)
+        expContent.setTop(new Label("The exception stacktrace was:")) // TODO externalize
         expContent.setMaxWidth(Double.MaxValue)
         alert.getDialogPane.setExpandableContent(expContent)
 

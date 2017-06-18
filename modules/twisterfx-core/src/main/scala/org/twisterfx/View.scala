@@ -41,7 +41,7 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
     def getWindow: Option[Window] = Option(sceneProperty.get).map(_.getWindow)
 
     final def assignTo( stage: Stage = new Stage(),
-                        owner: Window = null,
+                        owner: Window = getActiveStage.orNull,
                         modality: Modality = null,
                         style: StageStyle = null,
                         sizeToScene: Boolean = true,
@@ -67,7 +67,7 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
       */
     def beforeShow(): Unit = {}
 
-    def show(owner: Window = null,
+    def show(owner: Window = getActiveStage.orNull,
              modality: Modality = null,
              style: StageStyle = null,
              sizeToScene: Boolean = true,
@@ -75,17 +75,17 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
         assignTo(owner=owner, modality=modality, style=style, sizeToScene=sizeToScene, centerOnScreen=centerOnScreen).show()
     }
 
-    def showWindow(owner: Window = null, style: StageStyle = StageStyle.DECORATED): Unit = {
+    def showWindow(owner: Window = getActiveStage.orNull, style: StageStyle = StageStyle.DECORATED): Unit = {
         show(owner = owner, style = style)
     }
 
-    def showModal(owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED): Unit = {
+    def showModal(owner: Window = getActiveStage.orNull, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED): Unit = {
         show( owner = owner , modality = modality, style = style)
     }
 
     // TODO graphic for dialog
     // TODO header for dialog
-    def showDialog[M](owner: Window = null, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED ): Option[M] = {
+    def showDialog[M](owner: Window = getActiveStage.orNull, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED ): Option[M] = {
         val dialog = new javafx.scene.control.Dialog[M]
         dialog.titleProperty().bind(titleProperty)
         dialog.initOwner(owner)

@@ -1,11 +1,15 @@
 package org
 
 import javafx.application.Platform
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.beans.{InvalidationListener, Observable}
-import javafx.beans.value.{ChangeListener, ObservableValue, WritableObjectValue}
 import javafx.collections.ListChangeListener
 import javafx.collections.ListChangeListener.Change
+import javafx.stage.Stage
 
+import com.sun.javafx.stage.StageHelper
+
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
@@ -20,6 +24,13 @@ package object twisterfx {
 //
 //        def apply(): T = value
 //    }
+
+
+    /**
+      * Returns a currently focused stage/window if one exists
+      * @return stage in focus
+      */
+    def getActiveStage: Option[Stage] =  StageHelper.getStages.asScala.find( _.isFocused)
 
     /**
       * Ensure execution of action on FX thread
