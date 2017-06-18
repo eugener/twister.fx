@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 /**
   * A base from which application object is created. Since it implements [[scala.App]],
-  * it automatically becomes and executable object. If the bean of type View with id "RootView"
+  * it automatically becomes and executable object. If a bean of type View with id "root.view"
   * is available in DI context, it will be injected and used as the root view of the application.
   *
   */
@@ -30,7 +30,7 @@ abstract class App() extends scala.App with LazyLogging {
 
     // Root view. Injected by name
     @Inject
-    @Named("RootView")
+    @Named("root.view")
     protected var view: View = _
 
     protected[twisterfx] final def start(primaryStage: Stage): Unit = {

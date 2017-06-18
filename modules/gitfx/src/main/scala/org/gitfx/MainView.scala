@@ -15,7 +15,7 @@ import org.twisterfx.{Alerts, Command, FXMLView, View}
 
 import scala.util.{Failure, Success}
 
-@Component("RootView")
+@Component("root.view")
 class MainView extends FXMLView /*("mainview.fxml")*/ {
     title = "GitFX"
 }
@@ -72,7 +72,7 @@ class MainViewController {
         try {
             1/0
         } catch {
-            case ex =>  Alerts.exception(ex)
+            case ex: Throwable =>  Alerts.exception(ex)
         }
     }
 
