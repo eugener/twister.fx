@@ -41,9 +41,9 @@ package object twisterfx {
     }
 
     //TODO is better API possible?
-    def runAsync[T]( asyncAction: => T )( fxAction: T => Unit = {_: T =>} ): Unit = {
+    def runAsync[T]( asyncAction: => T )( fxAction: T => Unit = {_: T =>} ): Future[Unit] = {
         import scala.concurrent.ExecutionContext.Implicits.global
-        Future(asyncAction).map(fxAction)
+        Future(asyncAction).map( result => onFX(fxAction(result)))
     }
 
     // --- JavaFX implicit conversions for listeners
