@@ -46,6 +46,7 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
                         style: StageStyle = null,
                         sizeToScene: Boolean = true,
                         centerOnScreen: Boolean = true): Stage = {
+
         val scene = new Scene(root)
         stage.setScene(scene)
         stage.titleProperty.bind(titleProperty)

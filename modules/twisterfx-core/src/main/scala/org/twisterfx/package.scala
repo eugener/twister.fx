@@ -73,7 +73,4 @@ package object twisterfx {
     implicit def func2ListChangeListener[T]( func: => Unit ): ListChangeListener[T] =
         (_: Change[_ <: T]) => func
 
-
-
-
 }

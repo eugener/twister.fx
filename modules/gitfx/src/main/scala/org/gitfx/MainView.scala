@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import org.twisterfx.CommandTools._
-import org.twisterfx.{Alerts, Command, FXMLView, View}
+import org.twisterfx.ViewModel.FXProperty
+import org.twisterfx.{Command, FXMLView, View, ViewModel}
 
+import scala.beans.BeanProperty
 import scala.util.{Failure, Success}
 
 @Component("root.view")
@@ -68,25 +70,51 @@ class MainViewController {
     }
 
     def showInfo(): Unit = {
-       //new RepoInfo().showDialog(toolbar.getScene.getWindow)
-        try {
-            1/0
-        } catch {
-            case ex: Throwable =>  Alerts.exception(ex)
-        }
+
+       val model = PersonModel(Person("Eugene Ryzhikov", "exr0bs5@fpl.com"))
+       new PersonController().execute(model)
+
+//        try {
+//            1/0
+//        } catch {
+//            case ex: Throwable =>  Alerts.exception(ex)
+//        }
     }
 
 
 }
 
-class RepoInfo extends View {
+case class Person(@BeanProperty var fullName: String, @BeanProperty var email: String)
+
+case class PersonModel( person: Person ) extends ViewModel(person) {
+    val fullName: FXProperty[String] = bind[String](person,"fullName")
+    val email: FXProperty[String] = bind[String]( person, "email")
+}
+
+class PersonView extends View {
     override val root: VBox = new VBox(10)
 
-    title = "Repository Information"
+    title = "Person Information"
 
     val txFullName     = new TextField()
     val txEmailAddress = new TextField()
-
     root.getChildren.addAll(txFullName, txEmailAddress)
+
+
+}
+
+class PersonController {
+
+    val view = new PersonView
+
+    def execute( model: PersonModel ) : Unit = {
+        view.txFullName.textProperty().bindBidirectional(model.fullName)
+        view.txEmailAddress.textProperty().bindBidirectional(model.email)
+        try {
+            view.showDialog()
+        } finally {
+            model.unbind()
+        }
+    }
 
 }
