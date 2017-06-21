@@ -26,7 +26,7 @@ abstract class ViewModel[ENTITY]( val domainEntity: ENTITY ) {
 
     private def bind[T]( binding: Binding[T]): FXProperty[T] = {
         knownProperties += binding
-        rollback() // initialize model property
+        binding.rollback() // initialize model property
         binding.modelProperty
     }
 
