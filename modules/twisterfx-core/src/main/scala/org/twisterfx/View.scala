@@ -3,13 +3,13 @@ package org.twisterfx
 import java.util.ResourceBundle
 import javafx.beans.property._
 import javafx.fxml.FXMLLoader
-import javafx.scene.control.ButtonType
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
 import javax.inject.{Inject, Named}
 
 import com.typesafe.scalalogging.LazyLogging
 
+import scala.collection.JavaConverters._
 import scala.compat.java8.OptionConverters._
 import scala.util.Try
 
@@ -86,7 +86,13 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
     // TODO graphic for dialog
     // TODO header for dialog
-    def showDialog[M](owner: Window = getActiveStage.orNull, modality: Modality = Modality.WINDOW_MODAL, style: StageStyle = StageStyle.DECORATED ): Option[M] = {
+    def showDialog[M](
+         owner: Window = getActiveStage.orNull,
+         modality: Modality = Modality.WINDOW_MODAL,
+         style: StageStyle = StageStyle.DECORATED,
+         commands: Set[DialogCommand] = Set(DialogOKCommand, DialogCancelCommand)  ): Option[M] = {
+
+
         val dialog = new javafx.scene.control.Dialog[M]
         dialog.titleProperty().bind(titleProperty)
         dialog.initOwner(owner)
@@ -96,9 +102,13 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
         val dialogPane = dialog.getDialogPane
         dialogPane.setContent(root)
-        dialogPane.getButtonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
-//        dialogPane.setHeaderText("HEADER HEADER HEADER")
+        //        dialogPane.setHeaderText("HEADER HEADER HEADER")
+        dialogPane.getButtonTypes.addAll(commands.map(_.getButtonType).asJava)
 
+        dialog.setResultConverter{ buttonType =>
+            null.asInstanceOf[M]
+            //TODO return correct result
+        }
         dialog.showAndWait.asScala
     }
 
