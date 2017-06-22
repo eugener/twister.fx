@@ -94,12 +94,12 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
 
         val dialog = new javafx.scene.control.Dialog[M]
-        dialog.titleProperty().bind(titleProperty)
         dialog.initOwner(owner)
         dialog.initStyle(style)
         dialog.initModality(modality)
         dialog.resizableProperty.bindBidirectional(resizableProperty)
-
+        dialog.setTitle(title)
+   
         val dialogPane = dialog.getDialogPane
         dialogPane.setContent(root)
         //        dialogPane.setHeaderText("HEADER HEADER HEADER")
