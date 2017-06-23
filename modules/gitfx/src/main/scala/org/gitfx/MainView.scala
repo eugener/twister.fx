@@ -1,10 +1,12 @@
 package org.gitfx
 
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.fxml.FXML
 import javafx.scene.control.Alert.AlertType
 import javafx.scene.control._
 import javafx.scene.layout.VBox
 import javafx.stage.DirectoryChooser
+import javafx.util.converter.NumberStringConverter
 
 import org.gitfx.domain.Repository
 import org.springframework.beans.factory.annotation.Autowired
@@ -84,11 +86,15 @@ class MainViewController {
 
 }
 
-case class Person(@BeanProperty var fullName: String, @BeanProperty var email: String)
+case class Person(@BeanProperty var fullName: String, @BeanProperty var email: String) {
+    val ageProperty = new SimpleIntegerProperty(50)
+}
 
 case class PersonModel( person: Person ) extends ViewModel(person) {
     val fullName: FXProperty[String] = bind[String](person,"fullName")
-    val email: FXProperty[String] = bind[String]( person, "email")
+//    val email: FXProperty[String] = bind[String]( person, "email")
+    val email: FXProperty[String] = bind[String]( person.getEmail , person.setEmail _)
+    val age: FXProperty[Number] = bind( person.ageProperty )
 }
 
 class PersonView extends View {
@@ -98,8 +104,8 @@ class PersonView extends View {
 
     val txFullName     = new TextField()
     val txEmailAddress = new TextField()
-    root.getChildren.addAll(txFullName, txEmailAddress)
-
+    val txAge = new TextField()
+    root.getChildren.addAll(txFullName, txEmailAddress, txAge)
 
 }
 
@@ -110,6 +116,7 @@ class PersonController {
     def execute( model: PersonModel ) : Unit = {
         view.txFullName.textProperty().bindBidirectional(model.fullName)
         view.txEmailAddress.textProperty().bindBidirectional(model.email)
+        view.txAge.textProperty().bindBidirectional(model.age, new NumberStringConverter)
         try {
             view.showDialog()
         } finally {

@@ -2,14 +2,14 @@ package org.twisterfx
 
 import javafx.beans.property._
 import javafx.beans.property.adapter._
-import javafx.beans.value.WritableObjectValue
+import javafx.beans.value.WritableValue
 
 import scala.collection.mutable
 import scala.language.reflectiveCalls
 import scala.reflect.runtime.universe._
 
 object ViewModel {
-    type FXProperty[T] = Property[T] with WritableObjectValue[T]
+    type FXProperty[T] = Property[T] with WritableValue[T]
 }
 
 import org.twisterfx.ViewModel._
@@ -24,7 +24,7 @@ abstract class ViewModel[SUBJECT]( val subject: SUBJECT ) {
       * @tparam T property type
       * @return newly created property bound to the source property
       */
-    final def bind[T: TypeTag](sourceProperty: FXProperty[T]): FXProperty[T] = bind(new FXPropertyBinding[T](sourceProperty))
+    final def bind[T: TypeTag](sourceProperty: WritableValue[T]): FXProperty[T] = bind(new FXPropertyBinding[T](sourceProperty))
 
     /**
       * Creates property bound to a bean property and registers it in view model
@@ -92,9 +92,9 @@ class Binding[T: TypeTag]( subjectGetter: => T, val subjectSetter: T => Unit ) {
 
     val modelProperty: FXProperty[T] = Binding.createProperty[T]
 
-    def commit(): Unit = if ( isDirty ) subjectSet(modelProperty.get)
-    def rollback(): Unit = modelProperty.set(subjectGet)
-    def isDirty: Boolean = modelProperty.get != subjectGet
+    def commit(): Unit = if ( isDirty ) subjectSet(modelProperty.getValue)
+    def rollback(): Unit = modelProperty.setValue(subjectGet)
+    def isDirty: Boolean = modelProperty.getValue != subjectGet
     def unbind(): Unit = modelProperty.unbind()
 }
 
@@ -127,10 +127,8 @@ private object Binding {
 
 }
 
-import Binding._
+private class FXPropertyBinding[T: TypeTag](subjectProperty: WritableValue[T]) extends Binding[T](subjectProperty.getValue, subjectProperty.setValue)
 
-private class FXPropertyBinding[T: TypeTag](subjectProperty: FXProperty[T]) extends Binding[T](subjectProperty.get, subjectProperty.set )
-
-private class BeanPropertyBinding[T: TypeTag](bean: AnyRef, propName: String ) extends FXPropertyBinding[T]( asProperty(bean,propName))
+private class BeanPropertyBinding[T: TypeTag](bean: AnyRef, propName: String ) extends FXPropertyBinding[T]( Binding.asProperty(bean,propName))
 
 
