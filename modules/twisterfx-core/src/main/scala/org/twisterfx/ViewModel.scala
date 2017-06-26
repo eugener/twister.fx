@@ -82,7 +82,7 @@ abstract class ViewModel[SUBJECT]( val subject: SUBJECT ) {
 
 }
 
-class Binding[T: TypeTag]( subjectGetter: => T, val subjectSetter: T => Unit ) {
+private class Binding[T: TypeTag]( subjectGetter: => T, val subjectSetter: T => Unit ) {
 
     require( subjectGetter != null )
     require( subjectSetter != null )

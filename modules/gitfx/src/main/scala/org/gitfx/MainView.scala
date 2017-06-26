@@ -91,10 +91,10 @@ case class Person(@BeanProperty var fullName: String, @BeanProperty var email: S
 }
 
 case class PersonModel( person: Person ) extends ViewModel(person) {
-    val fullName: FXProperty[String] = bind[String](person,"fullName")
-//    val email: FXProperty[String] = bind[String]( person, "email")
-    val email: FXProperty[String] = bind[String]( person.getEmail , person.setEmail _)
-    val age: FXProperty[Number] = bind( person.ageProperty )
+    val fullName = bind[String](person,"fullName")
+//    val email = bind[String]( person, "email")
+    val email = bind[String]( person.getEmail , person.setEmail _)
+    val age = bind( person.ageProperty )
 }
 
 class PersonView extends View {
