@@ -61,21 +61,24 @@ trait Command {
   * Command creation tools
   */
 object Command {
-    def apply( text: String, graphic: Node = null, longText: String = null)(action: ActionEvent => Unit): Command = {
+
+    def apply( text: String,
+               longText: String = null,
+               graphic: Node = null,
+               disabled: Boolean = false,
+               accelerator: KeyCombination = null,
+               styleClasses: Iterable[String] = List())(action: ActionEvent => Unit): Command = {
+
         val cmd = new Command { override def perform(e: ActionEvent): Unit = action(e) }
         cmd.text = text
-        cmd.graphic = graphic
         cmd.longText = longText
+        cmd.graphic = graphic
+        cmd.disabled = disabled
+        cmd.accelerator = accelerator
+        cmd.styleClass.addAll(styleClasses.asJavaCollection)
         cmd
-    }
 
-//    def apply( text: String, graphic: Node = null, longText: String = null)(action: => Unit): Command = {
-//        val cmd = new Command { override def perform(e: ActionEvent): Unit = action }
-//        cmd.text = text
-//        cmd.graphic = graphic
-//        cmd.longText = longText
-//        cmd
-//    }
+    }
 
 }
 
