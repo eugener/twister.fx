@@ -75,7 +75,7 @@ object Command {
         cmd.graphic = graphic
         cmd.disabled = disabled
         cmd.accelerator = accelerator
-        cmd.styleClass.addAll(styleClasses.asJavaCollection)
+        cmd.styleClass.setAll(styleClasses.asJavaCollection)
         cmd
 
     }

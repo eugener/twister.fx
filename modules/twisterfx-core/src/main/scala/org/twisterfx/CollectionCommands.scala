@@ -4,25 +4,103 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.BooleanProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
+import javafx.scene.Node
 import javafx.scene.control.{ListView, MultipleSelectionModel, TableView}
+import javafx.scene.input.KeyCombination
 
 import scala.collection.JavaConverters._
 
 
-object
-ListCommands {
+object CollectionCommands {
+
+    private implicit class CommandImplicits[T <: Command](cmd: T) {
+        def setup(text: String = "Insert",
+                  longText: String = null,
+                  graphic: Node = null,
+                  accelerator: KeyCombination = null,
+                  styleClasses: Iterable[String]): T = {
+            cmd.text = text
+            cmd.longText = longText
+            cmd.graphic = graphic
+            cmd.accelerator = accelerator
+            cmd.styleClass.setAll(styleClasses.asJavaCollection)
+            cmd
+        }
+    }
 
     implicit class TableViewImplicits[T]( val table: TableView[T] ) {
 
-//         def createInsertCommand( text: String = "Insert" ): Unit = {
-//             val cmd = new CommandInsert[T](table)
-//             cmd.text = text
-//         }
+        def insertCommand(text: String = "Insert",
+                          longText: String = null,
+                          graphic: Node = null,
+                          accelerator: KeyCombination = null,
+                          styleClasses: Iterable[String] = List())(handle: T => T): CommandTableViewInsert[T] = {
+            new CommandTableViewInsert[T](table) {
+                override protected def insert(item: T): T = handle(item)
+            }.setup(text, longText, graphic, accelerator, styleClasses)
 
+        }
+
+        def updateCommand(text: String = "Update",
+                          longText: String = null,
+                          graphic: Node = null,
+                          accelerator: KeyCombination = null,
+                          styleClasses: Iterable[String] = List())(handle: T => T): CommandTableViewUpdate[T] = {
+            new CommandTableViewUpdate[T](table) {
+                override protected def update(item: T): T = handle(item)
+            }.setup(text, longText, graphic, accelerator, styleClasses)
+
+        }
+
+        def removeCommand(text: String = "Remove",
+                          longText: String = null,
+                          graphic: Node = null,
+                          accelerator: KeyCombination = null,
+                          styleClasses: Iterable[String] = List())(handle: Iterable[T] => Boolean): CommandTableViewRemove[T] = {
+            new CommandTableViewRemove[T](table) {
+                protected def remove(items: Iterable[T]): Boolean = handle(items)
+            }.setup(text, longText, graphic, accelerator, styleClasses)
+        }
 
     }
 
 
+    implicit class ListViewImplicits[T]( val table: ListView[T] ) {
+
+        def insertCommand(text: String = "Insert",
+                          longText: String = null,
+                          graphic: Node = null,
+                          accelerator: KeyCombination = null,
+                          styleClasses: Iterable[String] = List())(handle: T => T): CommandListViewInsert[T] = {
+            new CommandListViewInsert[T](table) {
+                override protected def insert(item: T): T = handle(item)
+            }.setup(text, longText, graphic, accelerator, styleClasses)
+
+        }
+
+        def updateCommand(text: String = "Update",
+                          longText: String = null,
+                          graphic: Node = null,
+                          accelerator: KeyCombination = null,
+                          styleClasses: Iterable[String] = List())(handle: T => T): CommandListViewUpdate[T] = {
+            new CommandListViewUpdate[T](table) {
+                override protected def update(item: T): T = handle(item)
+            }.setup(text, longText, graphic, accelerator, styleClasses)
+
+        }
+
+        def removeCommand(text: String = "Remove",
+                          longText: String = null,
+                          graphic: Node = null,
+                          accelerator: KeyCombination = null,
+                          styleClasses: Iterable[String] = List())(handle: Iterable[T] => Boolean): CommandListViewRemove[T] = {
+            new CommandListViewRemove[T](table) {
+                protected def remove(items: Iterable[T]): Boolean = handle(items)
+            }.setup(text, longText, graphic, accelerator, styleClasses)
+        }
+
+    }
+    
     /**
       * Generic trait for a command operating on control with item collection
       * @tparam T item type
@@ -31,7 +109,6 @@ ListCommands {
 
         protected def getSelectionModel: MultipleSelectionModel[T]
         protected def getItems: ObservableList[T]
-        protected def getDisabledProperty: BooleanProperty
 
         protected def initialEnabledCondition: Boolean = getSelectionModel.getSelectedItems.isEmpty
 
@@ -49,7 +126,7 @@ ListCommands {
         // for insert command selection does not have to be there
         override def initialEnabledCondition: Boolean = false
 
-        protected abstract def insert(item: T): T
+        protected def insert(item: T): T
 
         final override def perform(e: ActionEvent): Unit = {
             val selectedItem = getSelectionModel.getSelectedItem
@@ -62,7 +139,7 @@ ListCommands {
 
     abstract class CommandCollectionUpdate[T] extends CollectionCommand[T] {
 
-        protected abstract def update(item: T): T
+        protected def update(item: T): T
 
         final override def perform(e: ActionEvent): Unit = {
             val selectedItem  = getSelectionModel.getSelectedItem
@@ -76,7 +153,7 @@ ListCommands {
 
     abstract class CommandCollectionRemove[T] extends CollectionCommand[T] {
 
-        protected abstract def remove(item: Iterable[T]): Boolean
+        protected def remove(items: Iterable[T]): Boolean
 
         final override def perform(e: ActionEvent): Unit = {
             val selectedItems    = getSelectionModel.getSelectedItems
