@@ -1,7 +1,6 @@
 package org.twisterfx
 
 import javafx.beans.binding.Bindings
-import javafx.beans.property.BooleanProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.scene.Node
@@ -28,16 +27,19 @@ object CollectionCommands {
         }
     }
 
-    implicit class TableViewImplicits[T]( val table: TableView[T] ) {
+    type InsertAction[T] = T => T
+    type UpdateAction[T] = T => T
+    type RemoveAction[T] = Iterable[T] => Boolean
+
+
+    implicit class TableViewImplicits[T]( val tableView: TableView[T] ) {
 
         def insertCommand(text: String = "Insert",
                           longText: String = null,
                           graphic: Node = null,
                           accelerator: KeyCombination = null,
-                          styleClasses: Iterable[String] = List())(handle: T => T): CommandTableViewInsert[T] = {
-            new CommandTableViewInsert[T](table) {
-                override protected def insert(item: T): T = handle(item)
-            }.setup(text, longText, graphic, accelerator, styleClasses)
+                          styleClasses: Iterable[String] = List())(insertAction: InsertAction[T]): CommandTableViewInsert[T] = {
+            new CommandTableViewInsert[T](tableView, insertAction).setup(text, longText, graphic, accelerator, styleClasses)
 
         }
 
@@ -45,10 +47,8 @@ object CollectionCommands {
                           longText: String = null,
                           graphic: Node = null,
                           accelerator: KeyCombination = null,
-                          styleClasses: Iterable[String] = List())(handle: T => T): CommandTableViewUpdate[T] = {
-            new CommandTableViewUpdate[T](table) {
-                override protected def update(item: T): T = handle(item)
-            }.setup(text, longText, graphic, accelerator, styleClasses)
+                          styleClasses: Iterable[String] = List())(updateAction: UpdateAction[T]): CommandTableViewUpdate[T] = {
+            new CommandTableViewUpdate[T](tableView, updateAction).setup(text, longText, graphic, accelerator, styleClasses)
 
         }
 
@@ -56,10 +56,8 @@ object CollectionCommands {
                           longText: String = null,
                           graphic: Node = null,
                           accelerator: KeyCombination = null,
-                          styleClasses: Iterable[String] = List())(handle: Iterable[T] => Boolean): CommandTableViewRemove[T] = {
-            new CommandTableViewRemove[T](table) {
-                protected def remove(items: Iterable[T]): Boolean = handle(items)
-            }.setup(text, longText, graphic, accelerator, styleClasses)
+                          styleClasses: Iterable[String] = List())(removeAction: RemoveAction[T]): CommandTableViewRemove[T] = {
+            new CommandTableViewRemove[T](tableView, removeAction).setup(text, longText, graphic, accelerator, styleClasses)
         }
 
     }
@@ -71,10 +69,8 @@ object CollectionCommands {
                           longText: String = null,
                           graphic: Node = null,
                           accelerator: KeyCombination = null,
-                          styleClasses: Iterable[String] = List())(handle: T => T): CommandListViewInsert[T] = {
-            new CommandListViewInsert[T](table) {
-                override protected def insert(item: T): T = handle(item)
-            }.setup(text, longText, graphic, accelerator, styleClasses)
+                          styleClasses: Iterable[String] = List())(insertAction: InsertAction[T]): CommandListViewInsert[T] = {
+            new CommandListViewInsert[T](table, insertAction).setup(text, longText, graphic, accelerator, styleClasses)
 
         }
 
@@ -82,10 +78,8 @@ object CollectionCommands {
                           longText: String = null,
                           graphic: Node = null,
                           accelerator: KeyCombination = null,
-                          styleClasses: Iterable[String] = List())(handle: T => T): CommandListViewUpdate[T] = {
-            new CommandListViewUpdate[T](table) {
-                override protected def update(item: T): T = handle(item)
-            }.setup(text, longText, graphic, accelerator, styleClasses)
+                          styleClasses: Iterable[String] = List())(updateAction: UpdateAction[T]): CommandListViewUpdate[T] = {
+            new CommandListViewUpdate[T](table, updateAction).setup(text, longText, graphic, accelerator, styleClasses)
 
         }
 
@@ -93,14 +87,12 @@ object CollectionCommands {
                           longText: String = null,
                           graphic: Node = null,
                           accelerator: KeyCombination = null,
-                          styleClasses: Iterable[String] = List())(handle: Iterable[T] => Boolean): CommandListViewRemove[T] = {
-            new CommandListViewRemove[T](table) {
-                protected def remove(items: Iterable[T]): Boolean = handle(items)
-            }.setup(text, longText, graphic, accelerator, styleClasses)
+                          styleClasses: Iterable[String] = List())(removeAction: RemoveAction[T]): CommandListViewRemove[T] = {
+            new CommandListViewRemove[T](table, removeAction).setup(text, longText, graphic, accelerator, styleClasses)
         }
 
     }
-    
+
     /**
       * Generic trait for a command operating on control with item collection
       * @tparam T item type
@@ -111,7 +103,6 @@ object CollectionCommands {
         protected def getItems: ObservableList[T]
 
         protected def initialEnabledCondition: Boolean = getSelectionModel.getSelectedItems.isEmpty
-
         // override to provide condition enabling the command
         protected def enabledCondition: Boolean = false
 
@@ -121,44 +112,38 @@ object CollectionCommands {
       * Generic implementatoin
       * @tparam T item type
       */
-    abstract class CommandCollectionInsert[T] extends CollectionCommand[T] {
+    abstract class CommandCollectionInsert[T]( private val insertAction: InsertAction[T] ) extends CollectionCommand[T] {
 
         // for insert command selection does not have to be there
         override def initialEnabledCondition: Boolean = false
 
-        protected def insert(item: T): T
-
         final override def perform(e: ActionEvent): Unit = {
             val selectedItem = getSelectionModel.getSelectedItem
-            val newItem      = insert( selectedItem )
+            val newItem      = insertAction( selectedItem )
             getItems.add(newItem)
             getSelectionModel.select(newItem)
         }
 
     }
 
-    abstract class CommandCollectionUpdate[T] extends CollectionCommand[T] {
-
-        protected def update(item: T): T
+    abstract class CommandCollectionUpdate[T]( private val updateAction:UpdateAction[T]) extends CollectionCommand[T] {
 
         final override def perform(e: ActionEvent): Unit = {
             val selectedItem  = getSelectionModel.getSelectedItem
             val selectedIndex = getSelectionModel.getSelectedIndex
-            val newItem       = update( selectedItem )
+            val newItem       = updateAction( selectedItem )
             getItems.add( math.max(selectedIndex,0), newItem)
             getSelectionModel.select(newItem)
         }
 
     }
 
-    abstract class CommandCollectionRemove[T] extends CollectionCommand[T] {
-
-        protected def remove(items: Iterable[T]): Boolean
+    abstract class CommandCollectionRemove[T]( private val removeAction: RemoveAction[T] ) extends CollectionCommand[T] {
 
         final override def perform(e: ActionEvent): Unit = {
             val selectedItems    = getSelectionModel.getSelectedItems
             val minSelectedIndex = getSelectionModel.getSelectedIndices.asScala.min
-            if ( remove(selectedItems.asScala) ) {
+            if ( removeAction(selectedItems.asScala) ) {
                 getItems.removeAll(selectedItems)
                 val newSelectionIndex: Int = minSelectedIndex match {
                     case idx if idx < 0 || getItems.isEmpty => 0
@@ -205,13 +190,25 @@ object CollectionCommands {
     }
 
 
-    abstract class CommandListViewInsert[T](override val listView: ListView[T]) extends CommandCollectionInsert[T] with ListViewCommand[T]
-    abstract class CommandListViewUpdate[T](override val listView: ListView[T]) extends CommandCollectionUpdate[T] with ListViewCommand[T]
-    abstract class CommandListViewRemove[T](override val listView: ListView[T]) extends CommandCollectionRemove[T] with ListViewCommand[T]
+    class CommandListViewInsert[T](override val listView: ListView[T], insertAction: InsertAction[T])
+        extends CommandCollectionInsert[T](insertAction) with ListViewCommand[T]
 
-    abstract class CommandTableViewInsert[T](override val tableView: TableView[T]) extends CommandCollectionInsert[T] with TableViewCommand[T]
-    abstract class CommandTableViewUpdate[T](override val tableView: TableView[T]) extends CommandCollectionUpdate[T] with TableViewCommand[T]
-    abstract class CommandTableViewRemove[T](override val tableView: TableView[T]) extends CommandCollectionRemove[T] with TableViewCommand[T]
-    
-    
+    class CommandListViewUpdate[T](override val listView: ListView[T], updateAction: UpdateAction[T])
+        extends CommandCollectionUpdate[T](updateAction) with ListViewCommand[T]
+
+    class CommandListViewRemove[T](override val listView: ListView[T], removeAction: RemoveAction[T])
+        extends CommandCollectionRemove[T](removeAction) with ListViewCommand[T]
+
+    class CommandTableViewInsert[T](override val tableView: TableView[T], insertAction: InsertAction[T])
+        extends CommandCollectionInsert[T](insertAction) with TableViewCommand[T]
+
+    class CommandTableViewUpdate[T](override val tableView: TableView[T], updateAction: UpdateAction[T])
+        extends CommandCollectionUpdate[T](updateAction) with TableViewCommand[T]
+
+    class CommandTableViewRemove[T](override val tableView: TableView[T], removeAction: RemoveAction[T])
+        extends CommandCollectionRemove[T](removeAction) with TableViewCommand[T]
+
+
 }
+
+
