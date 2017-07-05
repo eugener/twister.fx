@@ -86,14 +86,13 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
     // TODO graphic for dialog
     // TODO header for dialog
-    def showDialog[M](
+    def showDialog[_ <: DialogCommand](
          owner: Window = getActiveStage.orNull,
          modality: Modality = Modality.WINDOW_MODAL,
          style: StageStyle = StageStyle.DECORATED,
-         commands: Set[DialogCommand] = Set(DialogOKCommand, DialogCancelCommand)  ): Option[M] = {
+         commands: Set[DialogCommand] = Set(DialogOKCommand, DialogCancelCommand ) ): Option[_ <: DialogCommand] = {
 
-
-        val dialog = new javafx.scene.control.Dialog[M]
+        val dialog = new javafx.scene.control.Dialog[DialogCommand]
         dialog.initOwner(owner)
         dialog.initStyle(style)
         dialog.initModality(modality)
@@ -103,11 +102,11 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
         val dialogPane = dialog.getDialogPane
         dialogPane.setContent(root)
         //        dialogPane.setHeaderText("HEADER HEADER HEADER")
-        dialogPane.getButtonTypes.addAll(commands.map(_.getButtonType).asJava)
+        dialogPane.getButtonTypes.addAll(commands.map( _.buttonType).asJava)
 
         dialog.setResultConverter{ buttonType =>
-            null.asInstanceOf[M]
-            //TODO return correct result
+            commands.find( _.buttonType == buttonType ).foreach( _.perform(dialog))
+            null.asInstanceOf[DialogCommand]
         }
         dialog.showAndWait.asScala
     }

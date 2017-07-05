@@ -3,6 +3,7 @@ package org.gitfx
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.fxml.FXML
 import javafx.scene.control.Alert.AlertType
+import javafx.scene.control.ButtonBar.ButtonData
 import javafx.scene.control._
 import javafx.scene.layout.VBox
 import javafx.stage.DirectoryChooser
@@ -13,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import org.twisterfx.CommandTools._
-import org.twisterfx.ViewModel.FXProperty
-import org.twisterfx.{Command, FXMLView, View, ViewModel}
+import org.twisterfx.{Command, DialogCommand, FXMLView, View, ViewController, ViewModel}
 
 import scala.beans.BeanProperty
 import scala.util.{Failure, Success}
@@ -109,19 +109,18 @@ class PersonView extends View {
 
 }
 
-class PersonController {
+class PersonController extends ViewController[PersonView,PersonModel]{
 
     val view = new PersonView
 
-    def execute( model: PersonModel ) : Unit = {
+    protected override def dialogCommands: Set[DialogCommand] =
+        super.dialogCommands + new DialogCommand( "Custom", ButtonData.LEFT )(_ => println("Custom action!!!"))
+
+    def bind( model: PersonModel ) : Unit = {
         view.txFullName.textProperty().bindBidirectional(model.fullName)
         view.txEmailAddress.textProperty().bindBidirectional(model.email)
         view.txAge.textProperty().bindBidirectional(model.age, new NumberStringConverter)
-        try {
-            view.showDialog()
-        } finally {
-            model.unbind()
-        }
     }
 
 }
+

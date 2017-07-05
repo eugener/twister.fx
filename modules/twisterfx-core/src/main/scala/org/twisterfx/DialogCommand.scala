@@ -1,27 +1,15 @@
 package org.twisterfx
 
+import javafx.event.ActionEvent
 import javafx.scene.control.ButtonBar.ButtonData
-import javafx.scene.control.ButtonType
+import javafx.scene.control.{ButtonType, Dialog}
 
-
-trait DialogCommand extends Command {
-
-    protected val buttonData: ButtonData
-
-    def getButtonType = new ButtonType( text, buttonData)
+class DialogCommand( text: String, buttonData: ButtonData)(action: Dialog[_] => Unit) extends Command {
+    val buttonType = new ButtonType( text, buttonData)
+    final override def perform( e: ActionEvent): Unit = action(e.getSource.asInstanceOf[Dialog[_]])
+    final def perform( dialog: Dialog[_]): Unit  = action(dialog)
 }
 
-case object DialogOKCommand extends DialogCommand {
-    val buttonData = ButtonData.OK_DONE
-    text = "OK"
-}
-
-case object DialogCancelCommand extends DialogCommand {
-    val buttonData = ButtonData.CANCEL_CLOSE
-    text = "Cancel"
-}
-
-case object DialogCloseCommand extends DialogCommand {
-    val buttonData = ButtonData.CANCEL_CLOSE
-    text = "Close"
-}
+case object DialogOKCommand extends DialogCommand("OK", ButtonData.OK_DONE )( _.close)
+case object DialogCancelCommand extends DialogCommand("Cancel", ButtonData.CANCEL_CLOSE)( _.close)
+case object DialogCloseCommand extends DialogCommand("Close", ButtonData.CANCEL_CLOSE)( _.close)
