@@ -2,7 +2,9 @@ package org.twisterfx
 
 import java.util.ResourceBundle
 import javafx.beans.property._
+import javafx.event.ActionEvent
 import javafx.fxml.FXMLLoader
+import javafx.scene.control.{Button, ButtonType}
 import javafx.scene.{Parent, Scene}
 import javafx.stage.{Modality, Stage, StageStyle, Window}
 import javax.inject.{Inject, Named}
@@ -86,13 +88,13 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
     // TODO graphic for dialog
     // TODO header for dialog
-    def showDialog[_ <: DialogCommand](
+    def showDialog(
          owner: Window = getActiveStage.orNull,
          modality: Modality = Modality.WINDOW_MODAL,
          style: StageStyle = StageStyle.DECORATED,
-         commands: Set[DialogCommand] = Set(DialogOKCommand, DialogCancelCommand ) ): Option[_ <: DialogCommand] = {
+         commands: Set[DialogCommand] = Set(DialogCommand.OK, DialogCommand.Cancel ) ): Option[DialogCommand] = {
 
-        val dialog = new javafx.scene.control.Dialog[DialogCommand]
+        val dialog = new javafx.scene.control.Dialog[ButtonType]
         dialog.initOwner(owner)
         dialog.initStyle(style)
         dialog.initModality(modality)
@@ -102,13 +104,17 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
         val dialogPane = dialog.getDialogPane
         dialogPane.setContent(root)
         //        dialogPane.setHeaderText("HEADER HEADER HEADER")
-        dialogPane.getButtonTypes.addAll(commands.map( _.buttonType).asJava)
 
-        dialog.setResultConverter{ buttonType =>
-            commands.find( _.buttonType == buttonType ).foreach( _.perform(dialog))
-            null.asInstanceOf[DialogCommand]
+        val cmdMap = commands.map( cmd => cmd.buttonType -> cmd).toMap
+
+        dialogPane.getButtonTypes.addAll(cmdMap.keys.asJavaCollection)
+        cmdMap.foreach{ case (bt,cmd) =>
+            dialogPane.lookupButton(bt) match {
+                case button: Button => button.setOnAction{cmd.perform}
+            }
         }
-        dialog.showAndWait.asScala
+
+        dialog.showAndWait.asScala.map(cmdMap(_))
     }
 
 }
