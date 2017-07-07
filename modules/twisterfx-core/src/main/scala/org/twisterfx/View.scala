@@ -107,10 +107,14 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
         val cmdMap = commands.map( cmd => cmd.buttonType -> cmd).toMap
 
+        // add button types to dialog pane to create buttons
         dialogPane.getButtonTypes.addAll(cmdMap.keys.asJavaCollection)
+
+        // assoiciate existing buttons to dialog commands
         cmdMap.foreach{ case (bt,cmd) =>
             dialogPane.lookupButton(bt) match {
-                case button: Button => button.setOnAction{cmd.perform}
+                case button: Button => button.addEventFilter(ActionEvent.ACTION, cmd.perform)
+                //TODO possibly support more controls in the future
             }
         }
 
