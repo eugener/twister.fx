@@ -9,7 +9,7 @@ class DialogCommand(text: String, buttonData: ButtonData, isClosing: Boolean = f
     val buttonType = new ButtonType( text, buttonData )
     final override def perform( e: ActionEvent): Unit = {
         action(e)
-        if (!isClosing) e.consume()
+        if (!isClosing) e.consume() // don't close the dialog
     }
 }
 

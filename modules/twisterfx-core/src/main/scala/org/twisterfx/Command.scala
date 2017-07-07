@@ -198,8 +198,8 @@ object CommandTools {
                 }
             }
 
-            button.sceneProperty().addListener((_, _, _) => resetAccelerator())
-            cmd.acceleratorProperty.addListener((_, _, _) => resetAccelerator())
+            button.sceneProperty().addListener(( _, _, _) => resetAccelerator())
+            cmd.acceleratorProperty.addListener(( _, _, _) => resetAccelerator())
             resetAccelerator()
 
             val tooltip = new Tooltip

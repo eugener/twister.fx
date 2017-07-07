@@ -107,18 +107,41 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
         val cmdMap = commands.map( cmd => cmd.buttonType -> cmd).toMap
 
+        def forEachButton( f: (Button, DialogCommand) => Unit ): Unit = {
+            cmdMap.foreach{ case (bt,cmd) =>
+                dialogPane.lookupButton(bt) match {
+                    case button: Button => f(button,cmd)
+                }
+            }
+        }
+
         // add button types to dialog pane to create buttons
         dialogPane.getButtonTypes.addAll(cmdMap.keys.asJavaCollection)
 
         // assoiciate existing buttons to dialog commands
-        cmdMap.foreach{ case (bt,cmd) =>
-            dialogPane.lookupButton(bt) match {
-                case button: Button => button.addEventFilter(ActionEvent.ACTION, cmd.perform)
-                //TODO possibly support more controls in the future
-            }
+
+        forEachButton(bindButton)
+        try {
+            dialog.showAndWait.asScala.map(cmdMap(_))
+        } finally {
+             forEachButton(unbindButton)
         }
 
-        dialog.showAndWait.asScala.map(cmdMap(_))
+    }
+
+
+
+    private def bindButton( button: Button, cmd: DialogCommand ): Unit = {
+        button.addEventFilter(ActionEvent.ACTION, cmd.perform)
+//        text is assigned through button type
+        button.graphicProperty().bind(cmd.graphicProperty)
+        button.disableProperty.bindBidirectional(cmd.disabledProperty)
+    }
+
+    private def unbindButton(button: Button, cmd: DialogCommand): Unit = {
+        button.textProperty().unbind()
+        button.graphicProperty().unbind()
+        button.disableProperty.unbindBidirectional(cmd.disabledProperty)
     }
 
 }
