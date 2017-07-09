@@ -103,42 +103,47 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
    
         val dialogPane = dialog.getDialogPane
         dialogPane.setContent(root)
-        //        dialogPane.setHeaderText("HEADER HEADER HEADER")
+
+        //TODO request focus: first control should take focus automatically
+        // dialogPane.setHeaderText("HEADER HEADER HEADER")
 
         val cmdMap = commands.map( cmd => cmd.buttonType -> cmd).toMap
-
-        def forEachButton( f: (Button, DialogCommand) => Unit ): Unit = {
-            cmdMap.foreach{ case (bt,cmd) =>
-                dialogPane.lookupButton(bt) match {
-                    case button: Button => f(button,cmd)
-                }
-            }
-        }
 
         // add button types to dialog pane to create buttons
         dialogPane.getButtonTypes.addAll(cmdMap.keys.asJavaCollection)
 
-        // assoiciate existing buttons to dialog commands
+        // get button/command map
+        val cmdButtons = cmdMap.foldLeft(Map[Button, DialogCommand]()){ case (m,(bt, cmd)) =>
+            dialogPane.lookupButton(bt) match {
+                case button: Button => m + (button -> cmd)
+                case _ => m
+            }
+        }
 
-        forEachButton(bindButton)
+        // associate existing buttons to dialog commands
+
         try {
+            cmdButtons.foreach(bindButton)
             dialog.showAndWait.asScala.map(cmdMap(_))
         } finally {
-             forEachButton(unbindButton)
+            cmdButtons.foreach(unbindButton)
         }
 
     }
 
 
 
-    private def bindButton( button: Button, cmd: DialogCommand ): Unit = {
+    private def bindButton( pair: (Button,Command) ): Unit = {
+        val (button,cmd) = pair
         button.addEventFilter(ActionEvent.ACTION, cmd.perform)
 //        text is assigned through button type
         button.graphicProperty().bind(cmd.graphicProperty)
         button.disableProperty.bindBidirectional(cmd.disabledProperty)
     }
 
-    private def unbindButton(button: Button, cmd: DialogCommand): Unit = {
+    private def unbindButton( pair: (Button,Command) ): Unit = {
+        val (button,cmd) = pair
+        //TODO remove event filter?
         button.textProperty().unbind()
         button.graphicProperty().unbind()
         button.disableProperty.unbindBidirectional(cmd.disabledProperty)
