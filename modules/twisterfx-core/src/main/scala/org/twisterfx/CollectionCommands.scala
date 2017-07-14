@@ -103,8 +103,17 @@ object CollectionCommands {
         protected def getItems: ObservableList[T]
 
         protected def initialEnabledCondition: Boolean = getSelectionModel.getSelectedItems.isEmpty
+
         // override to provide condition enabling the command
         protected def enabledCondition: Boolean = false
+
+        // bind disabled state of the command
+        disabledProperty.bind {
+            Bindings.createBooleanBinding(
+                () => initialEnabledCondition && !enabledCondition,
+                getSelectionModel.selectedIndexProperty
+            )
+        }
 
     }
 
@@ -163,15 +172,7 @@ object CollectionCommands {
         protected def getSelectionModel: MultipleSelectionModel[T] = tableView.getSelectionModel
         protected def getItems: ObservableList[T] = tableView.getItems
 
-        tableView.disableProperty().bind {
-            Bindings.createBooleanBinding(
-                () => initialEnabledCondition && !enabledCondition,
-                tableView.selectionModelProperty
-            )
-        }
-
     }
-
 
     trait ListViewCommand[T] extends CollectionCommand[T] {
 
@@ -179,13 +180,6 @@ object CollectionCommands {
 
         protected def getSelectionModel: MultipleSelectionModel[T] = listView.getSelectionModel
         protected def getItems: ObservableList[T] = listView.getItems
-
-        listView.disableProperty().bind {
-            Bindings.createBooleanBinding(
-                () => initialEnabledCondition && !enabledCondition,
-                listView.selectionModelProperty
-            )
-        }
 
     }
 
