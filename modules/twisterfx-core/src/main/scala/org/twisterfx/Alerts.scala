@@ -75,6 +75,7 @@ object Alerts {
         alert.showAndWait()
     }
 
+    //TODO cutomize button text (YES/NO for example)
     def confirmation( title: String, content: String, header: String = null): Boolean = {
         custom(AlertType.CONFIRMATION, title, content, header)
              .showAndWait().asScala
