@@ -10,7 +10,6 @@ import javafx.scene.layout.BorderPane
 import com.gluonhq.ignite.DIContext
 import com.gluonhq.ignite.spring.SpringContext
 import org.springframework.stereotype.Component
-import org.twisterfx.CollectionCommands.CommandTableViewRemove
 import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandTools, FXMLView}
 
 object TwisterDemo extends App {
@@ -88,7 +87,7 @@ class TableCommandDemo extends BorderPane {
     }
 
     val commandUpdate: CommandTableViewUpdate[Person] = tableView.updateCommand(){ person =>
-        person
+        person.copy( age = person.age + 1)
     }
 
     val commandRemove: CommandTableViewRemove[Person] = tableView.removeCommand(){ person =>
