@@ -26,7 +26,7 @@ trait Command {
     def text_=(value: String): Unit = textProperty.set(value)
 
     // long text is used mostly on tooltips
-    lazy val longTextProperty: StringProperty = new SimpleStringProperty
+    lazy val longTextProperty: StringProperty = new SimpleStringProperty(null)
     def longText: String = longTextProperty.get
     def longText_=(value: String): Unit = longTextProperty.set(value)
 
@@ -202,9 +202,9 @@ object CommandTools {
             cmd.acceleratorProperty.addListener(( _, _, _) => resetAccelerator())
             resetAccelerator()
 
-            val tooltip = new Tooltip
-            tooltip.textProperty().bind(cmd.longTextProperty)
-            button.setTooltip(tooltip)
+            cmd.longTextProperty.addListener { (_, _, txt) =>
+                button.setTooltip(Option(txt).map(new Tooltip(_)).orNull)
+            }
 
             button
 
