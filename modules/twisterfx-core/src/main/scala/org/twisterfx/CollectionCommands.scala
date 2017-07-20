@@ -27,8 +27,8 @@ object CollectionCommands {
         }
     }
 
-    type InsertAction[T] = T => T
-    type UpdateAction[T] = T => T
+    type InsertAction[T] = T => Option[T]
+    type UpdateAction[T] = T => Option[T]
     type RemoveAction[T] = Iterable[T] => Boolean
 
 
@@ -128,9 +128,12 @@ object CollectionCommands {
 
         final override def perform(e: ActionEvent): Unit = {
             val selectedItem = getSelectionModel.getSelectedItem
-            val newItem      = insertAction( selectedItem )
-            getItems.add(newItem)
-            getSelectionModel.select(newItem)
+
+            insertAction( selectedItem ).foreach{ newItem =>
+                getItems.add(newItem)
+                getSelectionModel.select(newItem)
+            }
+
         }
 
     }
@@ -140,9 +143,22 @@ object CollectionCommands {
         final override def perform(e: ActionEvent): Unit = {
             val selectedItem  = getSelectionModel.getSelectedItem
             val selectedIndex = getSelectionModel.getSelectedIndex
-            val newItem       = updateAction( selectedItem )
-            getItems.add( math.max(selectedIndex,0), newItem)
-            getSelectionModel.select(newItem)
+            updateAction( selectedItem ).foreach{ newItem =>
+
+                // check if new item is truly same object ref as selected one
+                // in that case collection update is not required
+                val collectionUpdateRequired = selectedItem match {
+                    case ref: AnyRef => ref.ne(newItem.asInstanceOf[AnyRef])
+                    case _ => true
+                }
+
+                if ( collectionUpdateRequired ) {
+                    getItems.remove(selectedIndex)
+                    getItems.add(math.max(selectedIndex, 0), newItem)
+                    getSelectionModel.select(newItem)
+                }
+            }
+
         }
 
     }

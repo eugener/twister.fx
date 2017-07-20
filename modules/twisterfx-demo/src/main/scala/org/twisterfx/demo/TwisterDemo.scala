@@ -83,11 +83,11 @@ class TableCommandDemo extends BorderPane {
     import org.twisterfx.CollectionCommands._
 
     val commandInsert: CommandTableViewInsert[Person] = tableView.insertCommand(){ person =>
-        person
+        Some(person)
     }
 
     val commandUpdate: CommandTableViewUpdate[Person] = tableView.updateCommand(){ person =>
-        person.copy( age = person.age + 1)
+        Some(person.copy( age = person.age + 1))
     }
 
     val commandRemove: CommandTableViewRemove[Person] = tableView.removeCommand(){ person =>
