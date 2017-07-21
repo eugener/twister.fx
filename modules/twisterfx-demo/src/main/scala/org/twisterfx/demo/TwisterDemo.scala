@@ -9,6 +9,8 @@ import javafx.scene.layout.BorderPane
 
 import com.gluonhq.ignite.DIContext
 import com.gluonhq.ignite.spring.SpringContext
+import de.jensd.fx.glyphs.{GlyphIcon, GlyphIcons, GlyphsBuilder}
+import de.jensd.fx.glyphs.fontawesome.{FontAwesomeIcon, FontAwesomeIconView}
 import org.springframework.stereotype.Component
 import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandTools, FXMLView}
 
@@ -82,15 +84,27 @@ class TableCommandDemo extends BorderPane {
 
     import org.twisterfx.CollectionCommands._
 
-    val commandInsert: CommandTableViewInsert[Person] = tableView.insertCommand(){ person =>
+    private implicit def getGlyph( kind: GlyphIcons ): GlyphIcon[_] = {
+        GlyphsBuilder
+            .create(classOf[FontAwesomeIconView])
+            .glyph(kind)
+            .size("18px")
+            .styleClass("toolbar-icon")
+            .build
+    }
+
+    val commandInsert: CommandTableViewInsert[Person] = tableView.insertCommand(
+        graphic = FontAwesomeIcon.PLUS) { person =>
         Some(person)
     }
 
-    val commandUpdate: CommandTableViewUpdate[Person] = tableView.updateCommand(){ person =>
+    val commandUpdate: CommandTableViewUpdate[Person] = tableView.updateCommand(
+        graphic = FontAwesomeIcon.EDIT ){ person =>
         Some(person.copy( age = person.age + 1))
     }
 
-    val commandRemove: CommandTableViewRemove[Person] = tableView.removeCommand(){ person =>
+    val commandRemove: CommandTableViewRemove[Person] = tableView.removeCommand(
+        graphic = FontAwesomeIcon.REMOVE ){ person =>
         Alerts.confirmation("Remove Item", "Are you sure?")
     }
 

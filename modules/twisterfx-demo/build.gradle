@@ -2,9 +2,16 @@ apply plugin: 'application'
 
 mainClassName = 'org.twisterfx.demo.TwisterDemo'
 
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
 dependencies {
     compile project(':twisterfx-core')
     compile 'com.gluonhq:ignite-spring:1.0.1'
     compile 'ch.qos.logback:logback-classic:1.1.7'
+
+    compile 'de.jensd:fontawesomefx-fontawesome:4.6.1-2'
 
 }
