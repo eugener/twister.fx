@@ -102,6 +102,8 @@ object CollectionCommands {
 
         protected def getSelectionModel: MultipleSelectionModel[T]
         protected def getItems: ObservableList[T]
+        protected def scrollTo( item: T ): Unit
+        protected def scrollTo( index:Int ): Unit
 
         protected def initialEnabledCondition: Boolean = getSelectionModel.getSelectedItems.isEmpty
 
@@ -128,11 +130,11 @@ object CollectionCommands {
         override def initialEnabledCondition: Boolean = false
 
         final override def perform(e: ActionEvent): Unit = {
-            val selectedItem = getSelectionModel.getSelectedItem
-
-            insertAction( selectedItem ).foreach{ newItem =>
+            insertAction( getSelectionModel.getSelectedItem ).foreach{ newItem =>
                 getItems.add(newItem)
+                getSelectionModel.clearSelection()
                 getSelectionModel.select(newItem)
+                scrollTo(newItem)
             }
 
         }
@@ -157,6 +159,7 @@ object CollectionCommands {
                     getItems.remove(selectedIndex)
                     getItems.add(math.max(selectedIndex, 0), newItem)
                     getSelectionModel.select(newItem)
+                    scrollTo(newItem)
                 }
             }
 
@@ -177,6 +180,7 @@ object CollectionCommands {
                     case idx                                => idx
                 }
                 getSelectionModel.select(newSelectionIndex)
+                scrollTo(newSelectionIndex)
             }
         }
 
@@ -188,6 +192,8 @@ object CollectionCommands {
 
         protected def getSelectionModel: MultipleSelectionModel[T] = tableView.getSelectionModel
         protected def getItems: ObservableList[T] = tableView.getItems
+        protected def scrollTo( item: T ): Unit = tableView.scrollTo(item)
+        protected def scrollTo( index:Int ): Unit = tableView.scrollTo(index)
 
     }
 
@@ -197,6 +203,8 @@ object CollectionCommands {
 
         protected def getSelectionModel: MultipleSelectionModel[T] = listView.getSelectionModel
         protected def getItems: ObservableList[T] = listView.getItems
+        protected def scrollTo( item: T ): Unit = listView.scrollTo(item)
+        protected def scrollTo( index:Int ): Unit = listView.scrollTo(index)
 
     }
 
