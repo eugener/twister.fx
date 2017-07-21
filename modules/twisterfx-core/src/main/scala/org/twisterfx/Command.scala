@@ -2,7 +2,7 @@ package org.twisterfx
 
 import java.util
 import java.util.Collections
-import javafx.beans.binding.Bindings
+import javafx.beans.binding.{Bindings, ObjectBinding}
 import javafx.beans.property._
 import javafx.collections.ListChangeListener.Change
 import javafx.collections.{FXCollections, ObservableList}
@@ -20,20 +20,28 @@ import scala.collection.mutable
   */
 trait Command {
 
+    import Command._
+
     // text which usually shows up on the button ot menu item
     lazy val textProperty: StringProperty = new SimpleStringProperty
-    def text: String = textProperty.get
+    def text: String = textProperty.get()
     def text_=(value: String): Unit = textProperty.set(value)
 
     // long text is used mostly on tooltips
     lazy val longTextProperty: StringProperty = new SimpleStringProperty(null)
-    def longText: String = longTextProperty.get
+    def longText: String = longTextProperty.get()
     def longText_=(value: String): Unit = longTextProperty.set(value)
 
     // graphic shown on the buttons or menu items
-    lazy val graphicProperty: ObjectProperty[Node] = new SimpleObjectProperty[Node]
-    def graphic: Node = graphicProperty.get
-    def graphic_=(value: Node): Unit = graphicProperty.set(value)
+    lazy val graphicBuilderProperty: ObjectProperty[NodeBuilder] = new SimpleObjectProperty[NodeBuilder]
+    def graphicBuilder: NodeBuilder = graphicBuilderProperty.get()
+    def graphicBuilder_=(value: NodeBuilder): Unit = graphicBuilderProperty.set(value)
+
+    def getGraphicProperty: ObjectBinding[Node] =  {
+        Bindings.createObjectBinding[Node](
+            () => Option(graphicBuilderProperty.get()).map(nb => nb()).orNull,
+            graphicBuilderProperty)
+    }
 
     // disabled status propagated to associated controls
     lazy val disabledProperty: BooleanProperty = new SimpleBooleanProperty
@@ -62,9 +70,11 @@ trait Command {
   */
 object Command {
 
+    type NodeBuilder = () => Node
+
     def apply( text: String,
                longText: String = null,
-               graphic: Node = null,
+               graphic: NodeBuilder = {null},
                disabled: Boolean = false,
                accelerator: KeyCombination = null,
                styleClasses: Iterable[String] = List())(action: ActionEvent => Unit): Command = {
@@ -72,7 +82,7 @@ object Command {
         val cmd = new Command { override def perform(e: ActionEvent): Unit = action(e) }
         cmd.text = text
         cmd.longText = longText
-        cmd.graphic = graphic
+        cmd.graphicBuilder = graphic
         cmd.disabled = disabled
         cmd.accelerator = accelerator
         cmd.styleClass.setAll(styleClasses.asJavaCollection)
@@ -110,10 +120,10 @@ trait Selectable {
   * @param text        group text
   * @param subcommands commands in the group
   */
-class CommandGroup(text: String, graphic: Node = null)(subcommands: Command*) extends MutedCommand {
+class CommandGroup(text: String, graphic: Command.NodeBuilder = {null})(subcommands: Command*) extends MutedCommand {
 
     textProperty.set(text)
-    graphicProperty.set(graphic)
+    graphicBuilderProperty.set(graphic)
 
     val commands: ObservableList[Command] = FXCollections.observableArrayList[Command](
         Option(subcommands).map(_.asJavaCollection).getOrElse(Collections.emptyList())
@@ -124,9 +134,9 @@ class CommandGroup(text: String, graphic: Node = null)(subcommands: Command*) ex
 /**
   * Command represented by check menu item or toggle check button
   */
-class CommandCheck(text: String, graphic: Node = null) extends MutedCommand with Selectable {
+class CommandCheck(text: String, graphic: Command.NodeBuilder = null) extends MutedCommand with Selectable {
     textProperty.set(text)
-    graphicProperty.set(graphic)
+    graphicBuilderProperty.set(graphic)
 
 }
 
@@ -135,9 +145,9 @@ class CommandCheck(text: String, graphic: Node = null) extends MutedCommand with
   *
   * @param groupId allows for grouping of radio items using toggle groups
   */
-class CommandRadio(text: String, graphic: Node = null)(val groupId: String) extends MutedCommand with Selectable {
+class CommandRadio(text: String, graphic: Command.NodeBuilder = null)(val groupId: String) extends MutedCommand with Selectable {
     textProperty.set(text)
-    graphicProperty.set(graphic)
+    graphicBuilderProperty.set(graphic)
 }
 
 /**
@@ -190,7 +200,7 @@ object CommandTools {
             }
 
             button.textProperty.bind(cmd.textProperty)
-            button.graphicProperty.bind(cmd.graphicProperty)
+            button.graphicProperty().bind(cmd.getGraphicProperty)
             button.disableProperty.bindBidirectional(cmd.disabledProperty)
             bindStyleClass(cmd.styleClass, button.getStyleClass)
 
@@ -243,7 +253,7 @@ object CommandTools {
             }
 
             menuItem.textProperty.bind(cmd.textProperty)
-            menuItem.graphicProperty.bind(cmd.graphicProperty)
+            menuItem.graphicProperty().bind(cmd.getGraphicProperty)
             menuItem.disableProperty.bindBidirectional(cmd.disabledProperty)
             menuItem.acceleratorProperty.bind(cmd.acceleratorProperty)
             bindStyleClass(cmd.styleClass, menuItem.getStyleClass)

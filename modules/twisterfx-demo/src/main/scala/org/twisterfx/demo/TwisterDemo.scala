@@ -3,14 +3,15 @@ package org.twisterfx.demo
 import java.util
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
+import javafx.scene.Node
 import javafx.scene.control._
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.layout.BorderPane
 
 import com.gluonhq.ignite.DIContext
 import com.gluonhq.ignite.spring.SpringContext
-import de.jensd.fx.glyphs.{GlyphIcon, GlyphIcons, GlyphsBuilder}
 import de.jensd.fx.glyphs.fontawesome.{FontAwesomeIcon, FontAwesomeIconView}
+import de.jensd.fx.glyphs.{GlyphIcons, GlyphsBuilder}
 import org.springframework.stereotype.Component
 import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandTools, FXMLView}
 
@@ -84,7 +85,7 @@ class TableCommandDemo extends BorderPane {
 
     import org.twisterfx.CollectionCommands._
 
-    private implicit def getGlyph( kind: GlyphIcons ): GlyphIcon[_] = {
+    private implicit def getGlyph( kind: GlyphIcons ): Node = {
         GlyphsBuilder
             .create(classOf[FontAwesomeIconView])
             .glyph(kind)
@@ -94,17 +95,17 @@ class TableCommandDemo extends BorderPane {
     }
 
     val commandInsert: CommandTableViewInsert[Person] = tableView.insertCommand(
-        graphic = FontAwesomeIcon.PLUS) { person =>
-        Some(person)
+        graphicBuilder = () => FontAwesomeIcon.PLUS) { person =>
+        Option(person).map(_.copy( age = person.age + 10)).orElse(Some(Person("123", "123", 123)))
     }
 
     val commandUpdate: CommandTableViewUpdate[Person] = tableView.updateCommand(
-        graphic = FontAwesomeIcon.EDIT ){ person =>
+        graphicBuilder = () => FontAwesomeIcon.EDIT ){ person =>
         Some(person.copy( age = person.age + 1))
     }
 
     val commandRemove: CommandTableViewRemove[Person] = tableView.removeCommand(
-        graphic = FontAwesomeIcon.REMOVE ){ person =>
+        graphicBuilder = () => FontAwesomeIcon.REMOVE ){ person =>
         Alerts.confirmation("Remove Item", "Are you sure?")
     }
 

@@ -3,7 +3,6 @@ package org.twisterfx
 import javafx.beans.binding.Bindings
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
-import javafx.scene.Node
 import javafx.scene.control.{ListView, MultipleSelectionModel, TableView}
 import javafx.scene.input.KeyCombination
 
@@ -12,15 +11,17 @@ import scala.collection.JavaConverters._
 
 object CollectionCommands {
 
+    import Command._
+
     private implicit class CommandImplicits[T <: Command](cmd: T) {
         def setup(text: String = "Insert",
                   longText: String = null,
-                  graphic: Node = null,
+                  graphicBuilder: NodeBuilder = null,
                   accelerator: KeyCombination = null,
                   styleClasses: Iterable[String]): T = {
             cmd.text = text
             cmd.longText = longText
-            cmd.graphic = graphic
+            cmd.graphicBuilder = graphicBuilder
             cmd.accelerator = accelerator
             cmd.styleClass.setAll(styleClasses.asJavaCollection)
             cmd
@@ -36,28 +37,28 @@ object CollectionCommands {
 
         def insertCommand(text: String = "Insert",
                           longText: String = null,
-                          graphic: Node = null,
+                          graphicBuilder: NodeBuilder = null,
                           accelerator: KeyCombination = null,
                           styleClasses: Iterable[String] = List())(insertAction: InsertAction[T]): CommandTableViewInsert[T] = {
-            new CommandTableViewInsert[T](tableView, insertAction).setup(text, longText, graphic, accelerator, styleClasses)
+            new CommandTableViewInsert[T](tableView, insertAction).setup(text, longText, graphicBuilder, accelerator, styleClasses)
 
         }
 
         def updateCommand(text: String = "Update",
                           longText: String = null,
-                          graphic: Node = null,
+                          graphicBuilder: NodeBuilder = null,
                           accelerator: KeyCombination = null,
                           styleClasses: Iterable[String] = List())(updateAction: UpdateAction[T]): CommandTableViewUpdate[T] = {
-            new CommandTableViewUpdate[T](tableView, updateAction).setup(text, longText, graphic, accelerator, styleClasses)
+            new CommandTableViewUpdate[T](tableView, updateAction).setup(text, longText, graphicBuilder, accelerator, styleClasses)
 
         }
 
         def removeCommand(text: String = "Remove",
                           longText: String = null,
-                          graphic: Node = null,
+                          graphicBuilder: NodeBuilder = null,
                           accelerator: KeyCombination = null,
                           styleClasses: Iterable[String] = List())(removeAction: RemoveAction[T]): CommandTableViewRemove[T] = {
-            new CommandTableViewRemove[T](tableView, removeAction).setup(text, longText, graphic, accelerator, styleClasses)
+            new CommandTableViewRemove[T](tableView, removeAction).setup(text, longText, graphicBuilder, accelerator, styleClasses)
         }
 
     }
@@ -67,28 +68,28 @@ object CollectionCommands {
 
         def insertCommand(text: String = "Insert",
                           longText: String = null,
-                          graphic: Node = null,
+                          graphicBuilder: NodeBuilder = null,
                           accelerator: KeyCombination = null,
                           styleClasses: Iterable[String] = List())(insertAction: InsertAction[T]): CommandListViewInsert[T] = {
-            new CommandListViewInsert[T](table, insertAction).setup(text, longText, graphic, accelerator, styleClasses)
+            new CommandListViewInsert[T](table, insertAction).setup(text, longText, graphicBuilder, accelerator, styleClasses)
 
         }
 
         def updateCommand(text: String = "Update",
                           longText: String = null,
-                          graphic: Node = null,
+                          graphicBuilder: NodeBuilder = null,
                           accelerator: KeyCombination = null,
                           styleClasses: Iterable[String] = List())(updateAction: UpdateAction[T]): CommandListViewUpdate[T] = {
-            new CommandListViewUpdate[T](table, updateAction).setup(text, longText, graphic, accelerator, styleClasses)
+            new CommandListViewUpdate[T](table, updateAction).setup(text, longText, graphicBuilder, accelerator, styleClasses)
 
         }
 
         def removeCommand(text: String = "Remove",
                           longText: String = null,
-                          graphic: Node = null,
+                          graphicBuilder: NodeBuilder = null,
                           accelerator: KeyCombination = null,
                           styleClasses: Iterable[String] = List())(removeAction: RemoveAction[T]): CommandListViewRemove[T] = {
-            new CommandListViewRemove[T](table, removeAction).setup(text, longText, graphic, accelerator, styleClasses)
+            new CommandListViewRemove[T](table, removeAction).setup(text, longText, graphicBuilder, accelerator, styleClasses)
         }
 
     }

@@ -131,13 +131,11 @@ trait View extends LazyLogging { //TODO logging framework should be chosen by th
 
     }
 
-
-
     private def bindButton( pair: (Button,Command) ): Unit = {
         val (button,cmd) = pair
         button.addEventFilter(ActionEvent.ACTION, cmd.perform)
 //        text is assigned through button type
-        button.graphicProperty().bind(cmd.graphicProperty)
+        button.graphicProperty().bind(cmd.getGraphicProperty)
         button.disableProperty.bindBidirectional(cmd.disabledProperty)
     }
 
