@@ -182,9 +182,11 @@ object CommandTools {
             }
 
             if (graphicOnly) {
-                Bindings.when(button.graphicProperty().isNotNull)
-                    .`then`(ContentDisplay.GRAPHIC_ONLY)
-                    .otherwise(ContentDisplay.CENTER)
+                button.contentDisplayProperty().bind(
+                    Bindings.when(button.graphicProperty().isNotNull)
+                        .`then`(ContentDisplay.GRAPHIC_ONLY)
+                        .otherwise(ContentDisplay.CENTER)
+                )
             }
 
             button.textProperty.bind(cmd.textProperty)
