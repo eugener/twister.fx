@@ -15,6 +15,8 @@ import de.jensd.fx.glyphs.{GlyphIcons, GlyphsBuilder}
 import org.springframework.stereotype.Component
 import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandTools, FXMLView}
 
+import scala.language.implicitConversions
+
 object TwisterDemo extends App {
     protected def diContext: DIContext = new SpringContext(this, () => util.Arrays.asList("org.twisterfx"))
     override def stop(): Unit = println("stopping")

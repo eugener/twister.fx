@@ -72,17 +72,17 @@ object Command {
 
     type NodeBuilder = () => Node
 
-    def apply( text: String,
-               longText: String = null,
-               graphic: NodeBuilder = {null},
-               disabled: Boolean = false,
-               accelerator: KeyCombination = null,
-               styleClasses: Iterable[String] = List())(action: ActionEvent => Unit): Command = {
+    def apply(text: String,
+              longText: String = null,
+              graphicBuilder: NodeBuilder = {null},
+              disabled: Boolean = false,
+              accelerator: KeyCombination = null,
+              styleClasses: Iterable[String] = List())(action: ActionEvent => Unit): Command = {
 
         val cmd = new Command { override def perform(e: ActionEvent): Unit = action(e) }
         cmd.text = text
         cmd.longText = longText
-        cmd.graphicBuilder = graphic
+        cmd.graphicBuilder = graphicBuilder
         cmd.disabled = disabled
         cmd.accelerator = accelerator
         cmd.styleClass.setAll(styleClasses.asJavaCollection)
@@ -120,10 +120,10 @@ trait Selectable {
   * @param text        group text
   * @param subcommands commands in the group
   */
-class CommandGroup(text: String, graphic: Command.NodeBuilder = {null})(subcommands: Command*) extends MutedCommand {
+class CommandGroup(text: String, graphicBuilder: Command.NodeBuilder = {null})(subcommands: Command*) extends MutedCommand {
 
     textProperty.set(text)
-    graphicBuilderProperty.set(graphic)
+    graphicBuilderProperty.set(graphicBuilder)
 
     val commands: ObservableList[Command] = FXCollections.observableArrayList[Command](
         Option(subcommands).map(_.asJavaCollection).getOrElse(Collections.emptyList())
@@ -134,9 +134,9 @@ class CommandGroup(text: String, graphic: Command.NodeBuilder = {null})(subcomma
 /**
   * Command represented by check menu item or toggle check button
   */
-class CommandCheck(text: String, graphic: Command.NodeBuilder = null) extends MutedCommand with Selectable {
+class CommandCheck(text: String, graphicBuilder: Command.NodeBuilder = null) extends MutedCommand with Selectable {
     textProperty.set(text)
-    graphicBuilderProperty.set(graphic)
+    graphicBuilderProperty.set(graphicBuilder)
 
 }
 
@@ -145,9 +145,9 @@ class CommandCheck(text: String, graphic: Command.NodeBuilder = null) extends Mu
   *
   * @param groupId allows for grouping of radio items using toggle groups
   */
-class CommandRadio(text: String, graphic: Command.NodeBuilder = null)(val groupId: String) extends MutedCommand with Selectable {
+class CommandRadio(text: String, graphicBuilder: Command.NodeBuilder = null)(val groupId: String) extends MutedCommand with Selectable {
     textProperty.set(text)
-    graphicBuilderProperty.set(graphic)
+    graphicBuilderProperty.set(graphicBuilder)
 }
 
 /**
