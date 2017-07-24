@@ -199,6 +199,7 @@ object CommandTools {
                 )
             }
 
+            button.setFocusTraversable(false)
             button.textProperty.bind(cmd.textProperty)
             button.graphicProperty().bind(cmd.getGraphicProperty)
             button.disableProperty.bindBidirectional(cmd.disabledProperty)
