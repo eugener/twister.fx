@@ -3,17 +3,17 @@ package org.twisterfx.demo
 import java.util
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
+import javafx.geometry.Orientation
 import javafx.scene.Node
 import javafx.scene.control._
 import javafx.scene.control.cell.PropertyValueFactory
-import javafx.scene.layout.BorderPane
 
 import com.gluonhq.ignite.DIContext
 import com.gluonhq.ignite.spring.SpringContext
 import de.jensd.fx.glyphs.fontawesome.{FontAwesomeIcon, FontAwesomeIconView}
 import de.jensd.fx.glyphs.{GlyphIcons, GlyphsBuilder}
 import org.springframework.stereotype.Component
-import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandTools, FXMLView}
+import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandSeparator, CommandTools, FXMLView, TableViewEditor}
 
 import scala.language.implicitConversions
 
@@ -58,16 +58,13 @@ class DemoViewController {
         commands.toMenu(menuBar)
         label.setContextMenu(commands.toContextMenu())
 
-        tabs.getTabs.add(new Tab( "Table Commands", new TableCommandDemo))
+        tabs.getTabs.add(new Tab( "Table Commands", new TableCommandDemo().root))
     }
 
 
 }
 
-class TableCommandDemo extends BorderPane {
-
-    val toolbar = new ToolBar()
-    val tableView = new TableView[Person]()
+class TableCommandDemo extends TableViewEditor[Person] {
 
     val tcFirstName = new TableColumn[Person,String]("First Name")
     tcFirstName.setCellValueFactory( new PropertyValueFactory[Person, String]("firstName"))
@@ -82,16 +79,13 @@ class TableCommandDemo extends BorderPane {
     tableView.getColumns.add(tcLastName)
     tableView.getColumns.add(tcAge)
 
-    setTop(toolbar)
-    setCenter(tableView)
-
     import org.twisterfx.CollectionCommands._
 
     private implicit def getGlyph( kind: GlyphIcons ): Node = {
         GlyphsBuilder
             .create(classOf[FontAwesomeIconView])
             .glyph(kind)
-            .size("18px")
+            .size("16px")
             .styleClass("toolbar-icon")
             .build
     }
@@ -111,7 +105,20 @@ class TableCommandDemo extends BorderPane {
         Alerts.confirmation("Remove Item", "Are you sure?")
     }
 
-    val tableCommands = List(commandInsert, commandUpdate, commandRemove)
+    val commandChangeOrientation = Command(
+        text = "Orientation",
+        longText = "Change toolbar orientation",
+        graphicBuilder = () => FontAwesomeIcon.REFRESH )
+    { e =>
+        val newOrientation = toolBarOrientationProperty.get() match  {
+            case Orientation.HORIZONTAL => Orientation.VERTICAL
+            case Orientation.VERTICAL => Orientation.HORIZONTAL
+        }
+        toolBarOrientationProperty.set(newOrientation)
+    }
+
+
+    val tableCommands = List(commandInsert, commandUpdate, commandRemove, CommandSeparator, commandChangeOrientation)
     import CommandTools._
     tableCommands.toToolBar(toolbar)
     tableView.setContextMenu(tableCommands.toContextMenu())
