@@ -12,6 +12,7 @@ dependencies {
     compile 'com.gluonhq:ignite-spring:1.0.1'
     compile 'ch.qos.logback:logback-classic:1.1.7'
 
-    compile 'de.jensd:fontawesomefx-fontawesome:4.6.1-2'
+//    compile 'de.jensd:fontawesomefx-fontawesome:4.6.1-2'
+    compile 'de.jensd:fontawesomefx-materialdesignfont:1.4.57-2'
 
 }

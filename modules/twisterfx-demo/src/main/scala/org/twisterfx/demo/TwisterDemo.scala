@@ -9,7 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory
 
 import com.gluonhq.ignite.DIContext
 import com.gluonhq.ignite.spring.SpringContext
-import de.jensd.fx.glyphs.fontawesome.{FontAwesomeIcon, FontAwesomeIconView}
+import de.jensd.fx.glyphs.materialdesignicons.{MaterialDesignIcon, MaterialDesignIconView}
 import de.jensd.fx.glyphs.{GlyphIcons, GlyphsBuilder}
 import org.springframework.stereotype.Component
 import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandSeparator, CommandTools, FXMLView, TableViewEditor, _}
@@ -82,32 +82,32 @@ class TableCommandDemo extends TableViewEditor[Person] {
 
     private implicit def getGlyph( kind: GlyphIcons ): Node = {
         GlyphsBuilder
-            .create(classOf[FontAwesomeIconView])
+            .create(classOf[MaterialDesignIconView])
             .glyph(kind)
-            .size("16px")
+            .size("21px")
             .styleClass("toolbar-icon")
             .build
     }
 
     val commandInsert: CommandTableViewInsert[Person] = tableView.insertCommand(
-        graphicBuilder = () => FontAwesomeIcon.PLUS) { person =>
+        graphicBuilder = () => MaterialDesignIcon.PLUS/*FontAwesomeIcon.PLUS*/) { person =>
         Option(person).map(_.copy( age = person.age + 10)).orElse(Some(Person("123", "123", 123)))
     }
 
     val commandUpdate: CommandTableViewUpdate[Person] = tableView.updateCommand(
-        graphicBuilder = () => FontAwesomeIcon.EDIT ){ person =>
+        graphicBuilder = () => MaterialDesignIcon.PENCIL/*FontAwesomeIcon.EDIT*/ ){ person =>
         Some(person.copy( age = person.age + 1))
     }
 
     val commandRemove: CommandTableViewRemove[Person] = tableView.removeCommand(
-        graphicBuilder = () => FontAwesomeIcon.REMOVE ){ person =>
+        graphicBuilder = () => MaterialDesignIcon.DELETE/*FontAwesomeIcon.REMOVE*/ ){ person =>
         Alerts.confirmation("Remove Item", "Are you sure?")
     }
 
     val commandChangeOrientation = Command(
         text = "Orientation",
         longText = "Change toolbar orientation",
-        graphicBuilder = () => FontAwesomeIcon.REFRESH )
+        graphicBuilder = () => MaterialDesignIcon.REFRESH )
     { e => toolBarOrientationProperty.set( toolBarOrientation.reverse ) }
 
     commands.setAll(commandInsert, commandUpdate, commandRemove, CommandSeparator, commandChangeOrientation)
