@@ -5,6 +5,7 @@ import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.beans.{InvalidationListener, Observable}
 import javafx.collections.ListChangeListener
 import javafx.collections.ListChangeListener.Change
+import javafx.geometry.Orientation
 import javafx.stage.Stage
 
 import com.sun.javafx.stage.StageHelper
@@ -73,4 +74,12 @@ package object twisterfx {
     implicit def func2ListChangeListener[T]( func: => Unit ): ListChangeListener[T] =
         (_: Change[_ <: T]) => func
 
+
+    implicit class OrientationImplicits( orientation: Orientation ) {
+
+        def reverse: Orientation = orientation match  {
+            case Orientation.HORIZONTAL => Orientation.VERTICAL
+            case Orientation.VERTICAL => Orientation.HORIZONTAL
+        }
+    }
 }
