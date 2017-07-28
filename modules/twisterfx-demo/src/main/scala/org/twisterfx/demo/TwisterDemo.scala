@@ -3,7 +3,6 @@ package org.twisterfx.demo
 import java.util
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
-import javafx.geometry.Orientation
 import javafx.scene.Node
 import javafx.scene.control._
 import javafx.scene.control.cell.PropertyValueFactory
@@ -13,7 +12,7 @@ import com.gluonhq.ignite.spring.SpringContext
 import de.jensd.fx.glyphs.fontawesome.{FontAwesomeIcon, FontAwesomeIconView}
 import de.jensd.fx.glyphs.{GlyphIcons, GlyphsBuilder}
 import org.springframework.stereotype.Component
-import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandSeparator, CommandTools, FXMLView, TableViewEditor}
+import org.twisterfx.{Alerts, App, Command, CommandCheck, CommandGroup, CommandRadio, CommandSeparator, CommandTools, FXMLView, TableViewEditor, _}
 
 import scala.language.implicitConversions
 
@@ -109,19 +108,9 @@ class TableCommandDemo extends TableViewEditor[Person] {
         text = "Orientation",
         longText = "Change toolbar orientation",
         graphicBuilder = () => FontAwesomeIcon.REFRESH )
-    { e =>
-        val newOrientation = toolBarOrientationProperty.get() match  {
-            case Orientation.HORIZONTAL => Orientation.VERTICAL
-            case Orientation.VERTICAL => Orientation.HORIZONTAL
-        }
-        toolBarOrientationProperty.set(newOrientation)
-    }
+    { e => toolBarOrientationProperty.set( toolBarOrientation.reverse ) }
 
-
-    val tableCommands = List(commandInsert, commandUpdate, commandRemove, CommandSeparator, commandChangeOrientation)
-    import CommandTools._
-    tableCommands.toToolBar(toolbar)
-    tableView.setContextMenu(tableCommands.toContextMenu())
+    commands.setAll(commandInsert, commandUpdate, commandRemove, CommandSeparator, commandChangeOrientation)
 
     tableView.setItems( FXCollections.observableArrayList(
         Person("Jason", "Rocco", 45),
