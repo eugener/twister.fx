@@ -14,7 +14,7 @@ allprojects {
 
     ext {
         scala_base = '2.12'
-        scala_minor = '1'
+        scala_minor = '4'
         scala_version = "$scala_base.$scala_minor"
     }
 
