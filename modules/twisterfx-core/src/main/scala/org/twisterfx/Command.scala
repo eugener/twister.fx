@@ -205,7 +205,7 @@ object CommandTools {
             button.disableProperty.bindBidirectional(cmd.disabledProperty)
             bindStyleClass(cmd.styleClass, button.getStyleClass)
 
-            def resetAccelerator() = {
+            def resetAccelerator(): Unit = {
                 Option(button.getScene).foreach {
                     _.getAccelerators.put(cmd.accelerator, () => button.fire())
                 }

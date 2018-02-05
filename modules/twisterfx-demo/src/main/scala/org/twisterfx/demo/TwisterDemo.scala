@@ -89,22 +89,22 @@ class TableCommandDemo extends TableViewEditor[Person] {
             .build
     }
 
-    val commandInsert: CommandTableViewInsert[Person] = tableView.insertCommand(
+    val commandInsert: CommandCollectionInsert[Person] = tableView.insertCommand(
         graphicBuilder = () => MaterialDesignIcon.PLUS/*FontAwesomeIcon.PLUS*/) { person =>
         Option(person).map(_.copy( age = person.age + 10)).orElse(Some(Person("123", "123", 123)))
     }
 
-    val commandUpdate: CommandTableViewUpdate[Person] = tableView.updateCommand(
+    val commandUpdate: CommandCollectionUpdate[Person] = tableView.updateCommand(
         graphicBuilder = () => MaterialDesignIcon.PENCIL/*FontAwesomeIcon.EDIT*/ ){ person =>
         Some(person.copy( age = person.age + 1))
     }
 
-    val commandRemove: CommandTableViewRemove[Person] = tableView.removeCommand(
+    val commandRemove: CommandCollectionRemove[Person] = tableView.removeCommand(
         graphicBuilder = () => MaterialDesignIcon.DELETE/*FontAwesomeIcon.REMOVE*/ ){ person =>
         Alerts.confirmation("Remove Item", "Are you sure?")
     }
 
-    val commandChangeOrientation = Command(
+    val commandChangeOrientation: Command = Command(
         text = "Orientation",
         longText = "Change toolbar orientation",
         graphicBuilder = () => MaterialDesignIcon.REFRESH )
